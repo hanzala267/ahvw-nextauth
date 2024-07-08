@@ -38,7 +38,7 @@ export const authOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
-          image: user.image, // Include the user's image
+          image: user.image,
         };
       },
     }),
@@ -47,14 +47,14 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
-        token.image = user.image; // Include the image in the JWT token
+        token.image = user.image;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role;
-        session.user.image = token.image; // Include the image in the session
+        session.user.image = token.image;
       }
       return session;
     },

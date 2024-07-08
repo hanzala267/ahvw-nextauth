@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../auth/[...nextauth]/route";
-import prisma from "../../../../../../lib/prisma"; // Adjust this path as needed
+import { NextResponse } from "next/server";
+import prisma from "../../../../../lib/prisma";
 
 export async function PUT(req, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
 
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
