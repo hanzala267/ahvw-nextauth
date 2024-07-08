@@ -16,8 +16,21 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-// import Navbar from "@/app/Admin/components/Navbar";
 import Navbar from "../components/Navbar";
+import { z } from "zod";
+import { toast } from "react-hot-toast";
+
+// Define Zod schema for form validation
+const schema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/[A-Z]/, "Password must include an uppercase letter")
+    .regex(/[a-z]/, "Password must include a lowercase letter"),
+});
 
 function AdminCreateEmployee() {
   const [firstName, setFirstName] = useState("");
@@ -42,6 +55,15 @@ function AdminCreateEmployee() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form data
+    try {
+      schema.parse({ firstName, lastName, email, password });
+    } catch (validationError) {
+      setError(validationError.errors[0].message);
+      return;
+    }
+
     const res = await fetch("/api/admin/create-employee", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -49,6 +71,7 @@ function AdminCreateEmployee() {
     });
 
     if (res.ok) {
+      toast.success("Employee created successfully!");
       router.push("/admin");
     } else {
       const data = await res.json();
