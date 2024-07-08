@@ -1,4 +1,3 @@
-// File: src/app/client/Services/page.js
 import React from "react";
 import Navbar from "../components/Navbar";
 import OngoingService from "../components/OngoingService";
@@ -51,7 +50,7 @@ const closedServices = [
   },
 ];
 
-function CleintServiceSection({ title, services, ServiceComponent }) {
+function ServiceSection({ title, services, ServiceComponent }) {
   return (
     <div>
       <h2 className="text-2xl font-bold my-6 mx-auto text-center">{title}</h2>
@@ -89,4 +88,4 @@ function ServicesPage() {
   );
 }
 
-export default withRoleProtection(CleintServiceSection, ["customer"]);
+export default withRoleProtection(ServicesPage, ["customer"]);
