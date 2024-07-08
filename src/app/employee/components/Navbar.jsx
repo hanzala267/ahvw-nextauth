@@ -59,7 +59,7 @@ export default function Navbar() {
             </SheetContent>
           </Sheet>
 
-          <img
+          <Image
             src="/AWVH.png"
             width={40}
             height={40}

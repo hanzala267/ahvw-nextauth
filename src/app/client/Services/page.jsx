@@ -1,7 +1,8 @@
+import React from "react";
 import Navbar from "../components/Navbar";
-import OngoingService from "../components/OngoingServices"; // Changed from OngoingServices to OngoingService
-import UpcomingService from "../components/UpcomingServices";
-import ClosedService from "../components/ClosedServices";
+import OngoingService from "../components/OngoingService";
+import UpcomingService from "../components/UpcomingService";
+import ClosedService from "../components/ClosedService";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 
 const ongoingServices = [
@@ -55,32 +56,34 @@ function ServicesPage() {
       <Navbar />
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <div>
-            <div className="text-2xl font-bold my-6 mx-auto text-center">
-              Ongoing Services
-            </div>
-            {ongoingServices.map((service) => (
-              <OngoingService key={service.id} service={service} />
-            ))}
-          </div>
-          <div>
-            <div className="text-2xl font-bold my-6 mx-auto text-center">
-              Upcoming Services
-            </div>
-            {upcomingServices.map((service) => (
-              <UpcomingService key={service.id} service={service} />
-            ))}
-          </div>
-          <div>
-            <div className="text-2xl font-bold my-6 mx-auto text-center">
-              Closed Services
-            </div>
-            {closedServices.map((service) => (
-              <ClosedService key={service.id} service={service} />
-            ))}
-          </div>
+          <ServiceSection
+            title="Ongoing Services"
+            services={ongoingServices}
+            ServiceComponent={OngoingService}
+          />
+          <ServiceSection
+            title="Upcoming Services"
+            services={upcomingServices}
+            ServiceComponent={UpcomingService}
+          />
+          <ServiceSection
+            title="Closed Services"
+            services={closedServices}
+            ServiceComponent={ClosedService}
+          />
         </div>
       </div>
+    </div>
+  );
+}
+
+function ServiceSection({ title, services, ServiceComponent }) {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold my-6 mx-auto text-center">{title}</h2>
+      {services.map((service) => (
+        <ServiceComponent key={service.id} service={service} />
+      ))}
     </div>
   );
 }

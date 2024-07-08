@@ -27,20 +27,68 @@ export default function Navbar() {
             <SheetContent side="left">
               <nav className="grid gap-6 text-lg font-medium">
                 <Image src="/AWVH.png" width={150} height={150} alt="Logo" />
-                <Link href="/admin" prefetch={true} className="text-muted-foreground hover:text-foreground">Home</Link>
-                <Link href="/admin/Vahicles" prefetch={true} className="text-muted-foreground hover:text-foreground">Vehicles</Link>
-                <Link href="/admin/Customers" prefetch={true} className="text-muted-foreground hover:text-foreground">Customers</Link>
-                <Link href="/admin/Services" prefetch={true} className="text-muted-foreground hover:text-foreground">Services</Link>
-                <Link href="/admin/Employee" prefetch={true} className="text-muted-foreground hover:text-foreground">Employee</Link>
-                <Link href="/admin/Inventory" prefetch={true} className="text-muted-foreground hover:text-foreground">Inventory</Link>
-                <Link href="/admin/create-employee" prefetch={true} className="text-muted-foreground hover:text-foreground">Add Employee</Link>
-                <Link href="/admin/Newcustomer" prefetch={true} className="text-muted-foreground hover:text-foreground">New Customers</Link>
+                <Link
+                  href="/admin"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/admin/Vahicles"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Vehicles
+                </Link>
+                <Link
+                  href="/admin/Customers"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Customers
+                </Link>
+                <Link
+                  href="/admin/Services"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Services
+                </Link>
+                <Link
+                  href="/admin/Employee"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Employee
+                </Link>
+                <Link
+                  href="/admin/Inventory"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Inventory
+                </Link>
+                <Link
+                  href="/admin/create-employee"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Add Employee
+                </Link>
+                <Link
+                  href="/admin/Newcustomer"
+                  prefetch={true}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  New Customers
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
 
           <nav className="hidden md:flex md:items-center md:gap-6 text-sm font-medium overflow-x-auto">
-            <img
+            <Image
               src="/AWVH.png"
               width={40}
               height={40}
@@ -73,7 +121,9 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden sm:block font-semibold whitespace-nowrap">Admin Dashboard</div>
+          <div className="hidden sm:block font-semibold whitespace-nowrap">
+            Admin Dashboard
+          </div>
           {session?.user && (
             <div className="flex items-center gap-2 sm:gap-4">
               <Button
