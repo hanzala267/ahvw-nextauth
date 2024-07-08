@@ -1,3 +1,4 @@
+// File: src/app/client/Services/page.js
 import React from "react";
 import Navbar from "../components/Navbar";
 import OngoingService from "../components/OngoingService";
@@ -50,6 +51,17 @@ const closedServices = [
   },
 ];
 
+function ServiceSection({ title, services, ServiceComponent }) {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold my-6 mx-auto text-center">{title}</h2>
+      {services.map((service) => (
+        <ServiceComponent key={service.id} service={service} />
+      ))}
+    </div>
+  );
+}
+
 function ServicesPage() {
   return (
     <div>
@@ -73,17 +85,6 @@ function ServicesPage() {
           />
         </div>
       </div>
-    </div>
-  );
-}
-
-function ServiceSection({ title, services, ServiceComponent }) {
-  return (
-    <div>
-      <h2 className="text-2xl font-bold my-6 mx-auto text-center">{title}</h2>
-      {services.map((service) => (
-        <ServiceComponent key={service.id} service={service} />
-      ))}
     </div>
   );
 }
