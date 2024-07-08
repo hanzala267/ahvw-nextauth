@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
-import OngoingService from "@/app/client/components/OngoingService";
-import UpcomingService from "@/app/client/components/UpcomingService";
-import ClosedService from "@/app/client/components/ClosedService";
+import OngoingService from "../components/OngoingServices";
+import UpcomingService from "../components/UpcomingService";
+import ClosedService from "../components/ClosedService";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 
 const ongoingServices = [
