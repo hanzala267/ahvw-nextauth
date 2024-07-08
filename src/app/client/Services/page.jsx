@@ -1,8 +1,8 @@
-import React from "react";
+"use client"
 import Navbar from "../components/Navbar";
-import OngoingService from "../components/OngoingService";
-import UpcomingService from "../components/UpcomingService";
-import ClosedService from "../components/ClosedService";
+import OngoingServices from "@/app/client/components/OngoingService";
+import UpcomingServices from "@/app/client/components/UpcomingService";
+import ClosedServices from "@/app/client/components/ClosedService";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 
 const ongoingServices = [
@@ -50,42 +50,39 @@ const closedServices = [
   },
 ];
 
-function ServiceSection({ title, services, ServiceComponent }) {
-  return (
-    <div>
-      <h2 className="text-2xl font-bold my-6 mx-auto text-center">{title}</h2>
-      {services.map((service) => (
-        <ServiceComponent key={service.id} service={service} />
-      ))}
-    </div>
-  );
-}
-
 function ServicesPage() {
   return (
     <div>
       <Navbar />
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          <ServiceSection
-            title="Ongoing Services"
-            services={ongoingServices}
-            ServiceComponent={OngoingService}
-          />
-          <ServiceSection
-            title="Upcoming Services"
-            services={upcomingServices}
-            ServiceComponent={UpcomingService}
-          />
-          <ServiceSection
-            title="Closed Services"
-            services={closedServices}
-            ServiceComponent={ClosedService}
-          />
+          <div>
+            <div className="text-2xl font-bold my-6 mx-auto text-center">
+              Ongoing Services
+            </div>
+            {ongoingServices.map((service) => (
+              <OngoingServices key={service.id} service={service} />
+            ))}
+          </div>
+          <div>
+            <div className="text-2xl font-bold my-6 mx-auto text-center">
+              Upcoming Services
+            </div>
+            {upcomingServices.map((service) => (
+              <UpcomingServices key={service.id} service={service} />
+            ))}
+          </div>
+          <div>
+            <div className="text-2xl font-bold my-6 mx-auto text-center">
+              Closed Services
+            </div>
+            {closedServices.map((service) => (
+              <ClosedServices key={service.id} service={service} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
 export default withRoleProtection(ServicesPage, ["customer"]);

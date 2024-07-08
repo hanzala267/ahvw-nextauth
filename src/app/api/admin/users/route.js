@@ -1,23 +1,16 @@
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import prisma from "../../../../../lib/prisma"; // Make sure this path is correct
-
-// Adjust this import path as needed
+import prisma from "../../../../../lib/prisma"; // Adjust this path as needed
 
 export async function GET(req) {
   const session = await getServerSession();
 
   if (!session) {
-    return new Response(JSON.stringify({ error: "Not authenticated" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   if (session.user.role !== "admin") {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -34,15 +27,12 @@ export async function GET(req) {
         isApproved: true,
       },
     });
-    return new Response(JSON.stringify(users), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(users, { status: 200 });
   } catch (error) {
     console.error("Error fetching users:", error);
-    return new Response(JSON.stringify({ error: "Failed to fetch users" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 }
+    );
   }
 }
