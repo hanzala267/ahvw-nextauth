@@ -13,7 +13,7 @@ export default function Navbar() {
     <div className="flex h-full w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center justify-between border-b px-4 md:px-6 bg-background shadow-sm">
         <div className="flex items-center">
-          <Sheet>
+          <Sheet className="">
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -25,7 +25,7 @@ export default function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-              <nav className="grid gap-6 text-lg font-medium">
+              <nav className="grid gap-6 text-lg font-medium overflow-x-visible">
                 <Image src="/AWVH.png" width={150} height={150} alt="Logo" />
                 <Link
                   href="/admin"
