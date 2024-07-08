@@ -51,7 +51,7 @@ const closedServices = [
   },
 ];
 
-function ServiceSection({ title, services, ServiceComponent }) {
+function CleintServiceSection({ title, services, ServiceComponent }) {
   return (
     <div>
       <h2 className="text-2xl font-bold my-6 mx-auto text-center">{title}</h2>
@@ -89,4 +89,4 @@ function ServicesPage() {
   );
 }
 
-export default withRoleProtection(ServicesPage, ["customer"]);
+export default withRoleProtection(CleintServiceSection, ["customer"]);
