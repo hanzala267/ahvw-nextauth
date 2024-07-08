@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
 // import { authOptions } from "../../../auth/[...nextauth]/route";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import prisma from "../../../../../lib/prisma";
 // import prisma from "../../../../../../lib/prisma"; // Adjust this import path as needed
 

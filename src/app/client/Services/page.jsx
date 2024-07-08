@@ -1,8 +1,7 @@
-// import Navbar from "@/app/Client/components/Navbar";
 import Navbar from "../components/Navbar";
-import OngoingServices from "@/app/client/components/OngoingServices";
-import UpcomingServices from "@/app/client/components/UpcomingServices";
-import ClosedServices from "@/app/client/components/ClosedServices";
+import OngoingService from "@/app/client/components/OngoingService";
+import UpcomingService from "@/app/client/components/UpcomingService";
+import ClosedService from "@/app/client/components/ClosedService";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 
 const ongoingServices = [
@@ -61,7 +60,7 @@ function ServicesPage() {
               Ongoing Services
             </div>
             {ongoingServices.map((service) => (
-              <OngoingServices key={service.id} service={service} />
+              <OngoingService key={service.id} service={service} />
             ))}
           </div>
           <div>
@@ -69,7 +68,7 @@ function ServicesPage() {
               Upcoming Services
             </div>
             {upcomingServices.map((service) => (
-              <UpcomingServices key={service.id} service={service} />
+              <UpcomingService key={service.id} service={service} />
             ))}
           </div>
           <div>
@@ -77,7 +76,7 @@ function ServicesPage() {
               Closed Services
             </div>
             {closedServices.map((service) => (
-              <ClosedServices key={service.id} service={service} />
+              <ClosedService key={service.id} service={service} />
             ))}
           </div>
         </div>
@@ -85,4 +84,5 @@ function ServicesPage() {
     </div>
   );
 }
+
 export default withRoleProtection(ServicesPage, ["customer"]);

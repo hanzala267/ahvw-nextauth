@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import prisma from "../../../../lib/prisma"; // Make sure this path is correct
 
 // Adjust this import path as needed
