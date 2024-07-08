@@ -1,8 +1,8 @@
-"use client"
+"use client";
 import Navbar from "../components/Navbar";
 import OngoingServices from "@/app/client/components/OngoingService";
 import UpcomingServices from "@/app/client/components/UpcomingService";
-import ClosedServices from "@/app/client/components/ClosedService";
+import ClosedServices from "@/app/client/components/ClosedServices";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 
 const ongoingServices = [
