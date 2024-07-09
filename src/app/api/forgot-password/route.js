@@ -36,7 +36,7 @@ export async function POST(req) {
     });
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: "mhanzala267@gmail.com",
       to: user.email,
       subject: "Password Reset",
       text: `
