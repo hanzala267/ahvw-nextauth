@@ -28,7 +28,7 @@ export async function POST(req) {
     const transporter = createTransport({
       service: "gmail",
       secure: true,
-      port: 587,
+      port: 465,
       auth: {
         user: "mhanzala267@gmail.com",
         pass: "byjuetuwkqkpkiru",
@@ -36,7 +36,7 @@ export async function POST(req) {
     });
 
     const mailOptions = {
-      from: "mhanzala267@gmail.com",
+      from: process.env.EMAIL_FROM,
       to: user.email,
       subject: "Password Reset",
       text: `
