@@ -28,7 +28,7 @@ export async function POST(req) {
     const transporter = createTransport({
       service: "gmail",
       secure: true,
-      port: 465,
+      port: 587,
       auth: {
         user: "mhanzala267@gmail.com",
         pass: "byjuetuwkqkpkiru",
