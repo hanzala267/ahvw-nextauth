@@ -1,33 +1,76 @@
 "use client";
-import { useState } from "react";
-// import Navbar from "@/app/Admin/components/Navbar";
+
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import VahiclesDetails from "@/app/admin/components/VahiclesDetails";
-import VehiclePast from "@/app/admin/components/VahiclesPast";
-import VehicleUpcoming from "@/app/admin/components/VahiclesUpcoming";
+import VehicleDetails from "@/app/admin/components/VehicleDetails";
+import VehiclePast from "@/app/admin/components/VehiclePast";
+import VehicleUpcoming from "@/app/admin/components/VehicleUpcoming";
 import MenuIcon from "@/app/admin/components/MenuIcon";
+import VehicleInput from "@/app/admin/components/VehicleInput";
 import { Input } from "@/components/ui/input";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 
-const vehicles = [
-  { id: "cajd6hcx", name: "Vehicle 1" },
-  { id: "dajd7hdy", name: "Vehicle 2" },
-  { id: "eajd8hez", name: "Vehicle 3" },
-  { id: "fajd9hfa", name: "Vehicle 4" },
-];
-
-const AdminVahicle = () => {
-  const [selectedVehicle, setSelectedVehicle] = useState(vehicles[0]);
+const AdminVehicle = () => {
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const response = await fetch("/api/admin/vehicle/fetch");
+        if (!response.ok) {
+          throw new Error("Failed to fetch vehicles");
+        }
+        const data = await response.json();
+        setVehicles(data);
+        if (data.length > 0) {
+          setSelectedVehicle(data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching vehicles:", error);
+        // Handle error (e.g., show error message to user)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
 
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const filteredVehicles = vehicles.filter((vehicle) =>
-    vehicle.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/admin/vehicle/fetch?search=${searchQuery}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to search vehicles");
+      }
+      const data = await response.json();
+      setVehicles(data);
+      if (data.length > 0) {
+        setSelectedVehicle(data[0]);
+      } else {
+        setSelectedVehicle(null);
+      }
+    } catch (error) {
+      console.error("Error searching vehicles:", error);
+      // Handle error (e.g., show error message to user)
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -39,19 +82,27 @@ const AdminVahicle = () => {
           }`}
         >
           <h2 className="text-xl font-medium text-gray-900 mb-4">Vehicles</h2>
-          <Input
-            type="text"
-            placeholder="Search vehicles"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="mb-4"
-          />
+          <div className="flex mb-4">
+            <Input
+              type="text"
+              placeholder="Search vehicles"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-grow"
+            />
+            <button
+              onClick={handleSearch}
+              className="ml-2 px-4 py-2 bg-primary text-white rounded-md"
+            >
+              Search
+            </button>
+          </div>
           <ul>
-            {filteredVehicles.map((vehicle) => (
+            {vehicles.map((vehicle) => (
               <li
                 key={vehicle.id}
                 className={`p-2 cursor-pointer rounded-lg ${
-                  selectedVehicle.id === vehicle.id
+                  selectedVehicle?.id === vehicle.id
                     ? "bg-primary text-white"
                     : "hover:bg-primary/90 my-4 hover:text-white"
                 }`}
@@ -69,13 +120,24 @@ const AdminVahicle = () => {
           <MenuIcon onClick={handleSidebarToggle} />
         </div>
         <main className="flex-1 p-6 bg-gray-50 space-y-6">
-          <VahiclesDetails vehicle={selectedVehicle} />
-          <VehiclePast vehicle={selectedVehicle} />
-          <VehicleUpcoming vehicle={selectedVehicle} />
+          <VehicleInput
+            onVehicleAdded={(newVehicle) =>
+              setVehicles([...vehicles, newVehicle])
+            }
+          />
+          {selectedVehicle ? (
+            <>
+              <VehicleDetails vehicle={selectedVehicle} />
+              <VehiclePast vehicle={selectedVehicle} />
+              <VehicleUpcoming vehicle={selectedVehicle} />
+            </>
+          ) : (
+            <div>No vehicle selected</div>
+          )}
         </main>
       </div>
     </>
   );
 };
 
-export default withRoleProtection(AdminVahicle, ["admin"]);
+export default withRoleProtection(AdminVehicle, ["admin"]);

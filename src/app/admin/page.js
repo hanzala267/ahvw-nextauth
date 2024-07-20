@@ -1,15 +1,33 @@
 "use client";
 
-import { useState } from "react";
-// import Navbar from "@/app/Admin/components/Navbar";
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import { Calendar } from "@/components/ui/calendar";
 import Lowstock from "@/app/admin/components/Lowstock";
 import Todayservises from "@/app/admin/components/Todayservices";
 import { withRoleProtection } from "../../components/withRoleProtection";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function AdminDashboard() {
   const [date, setDate] = useState(new Date());
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      setLoading(true); // Set loading to true before fetching data
+      const response = await fetch(
+        `/api/admin/services-by-date?date=${date.toISOString()}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+      setLoading(false); // Set loading to false after fetching data
+    };
+
+    fetchServices();
+  }, [date]);
 
   return (
     <>
@@ -20,18 +38,24 @@ function AdminDashboard() {
           <Calendar
             mode="single"
             selected={date}
-            onSelect={setDate}
+            onSelect={(newDate) => setDate(newDate)}
             className="rounded-md border"
           />
         </div>
-        <div className="w-full md:w-1/2 lg:w-1/3">
+        <div className="w-full md:w-1/2 lg:w-1/2">
           <h2 className="text-2xl font-bold mb-4">Low Part Stock</h2>
           <Lowstock />
         </div>
       </div>
       <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">Today Services</h2>
-        <Todayservises />
+        <h2 className="text-2xl font-bold mb-4">
+          Services for {date.toLocaleDateString()}
+        </h2>
+        {loading ? (
+          <Skeleton className="h-48" /> // Add Skeleton component here
+        ) : (
+          <Todayservises services={services} />
+        )}
       </div>
     </>
   );

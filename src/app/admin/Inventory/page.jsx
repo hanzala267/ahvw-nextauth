@@ -2,7 +2,7 @@
 
 import Navbar from "@/app/admin/components/Navbar";
 import InventoryTable from "@/app/admin/components/InventoryTable";
-import InventoryForm from "@/app/admin/components/InventoryForm";
+// import InventoryForm from "@/app/admin/components/InventoryForm";
 import { withRoleProtection } from "@/components/withRoleProtection";
 
 function AdminInventory() {
@@ -10,12 +10,12 @@ function AdminInventory() {
     <>
       <Navbar />
       <div className="justify-center">
-        <div className="mx-auto container justify-center">
+        {/* <div className="mx-auto container justify-center">
           <div className="text-2xl font-semibold text-center mt-12 mb-6">
             Add stocks
           </div>
           <InventoryForm />
-        </div>
+        </div> */}
         <div className="mx-auto container justify-center">
           <div className="text-2xl font-semibold text-center mt-12 mb-6">
             Inventory

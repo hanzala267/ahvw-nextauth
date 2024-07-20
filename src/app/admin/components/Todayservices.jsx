@@ -1,71 +1,43 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-export default function Component() {
-  const data = [
-    {
-      WS_Vehicle_Ref: "AMANAT1",
-      Vehicle_Registration: "YV98PN",
-      Customer: "Amanat Transport Pty Ltd",
-      Status: "Closed",
-    },
-    {
-      WS_Vehicle_Ref: "AMANAT1",
-      Vehicle_Registration: "YV98PN",
-      Customer: "Amanat Transport Pty Ltd",
-      Status: "Open",
-    },
-    {
-      WS_Vehicle_Ref: "AMANAT1",
-      Vehicle_Registration: "YV98PN",
-      Customer: "Amanat Transport Pty Ltd",
-      Status: "Open",
-    },
-    {
-      WS_Vehicle_Ref: "AMANAT1",
-      Vehicle_Registration: "YV98PN",
-      Customer: "Amanat Transport Pty Ltd",
-      Status: "Closed",
-    },
-    {
-      WS_Vehicle_Ref: "AMANAT1",
-      Vehicle_Registration: "YV98PN",
-      Customer: "Amanat Transport Pty Ltd",
-      Status: "Closed",
-    },
-  ];
 
+export default function Todayservises({ services }) {
   return (
-    <Card className=" sm:hover:scale-105 transition ease-in-out duration-200">
+    <Card className="sm:hover:scale-105 transition ease-in-out duration-200">
       <CardHeader>
-        <CardTitle> Today Services</CardTitle>
+        <CardTitle>Services</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-8">
-        {data.map((item, index) => (
-          <div key={index} className="flex items-center gap-4">
+        {services.map((service, index) => (
+          <div key={service.id} className="flex items-center gap-4">
             <Avatar className="hidden h-9 w-9 sm:flex">
-              <AvatarImage src={`/avatars/${index + 1}.png`} alt="Avatar" />
+              <AvatarImage src={`/avatars/${(index % 5) + 1}.png`} alt="Avatar" />
               <AvatarFallback>
-                {item.Customer.slice(0, 2).toUpperCase()}
+                {service.vehicle.owner.firstName?.slice(0, 1)}
+                {service.vehicle.owner.lastName?.slice(0, 1)}
               </AvatarFallback>
             </Avatar>
             <div className="grid gap-1">
               <p className="text-sm font-medium leading-none">
-                {item.Customer}
+                {service.vehicle.owner.firstName} {service.vehicle.owner.lastName}
               </p>
               <p className="text-sm text-muted-foreground">
-                {item.Vehicle_Registration}
+                {service.vehicle.licensePlate}
               </p>
             </div>
-            <div className="ml-auto font-medium ">
+            <div className="ml-auto font-medium">
               <Badge
-                variant={item.Status === "Closed" ? "default" : "secondary"}
+                variant={service.status === "Completed" ? "default" : "secondary"}
               >
-                {item.Status}
+                {service.status}
               </Badge>
-            </div>{" "}
+            </div>
           </div>
         ))}
+        {services.length === 0 && (
+          <p className="text-center text-muted-foreground">No services for this date.</p>
+        )}
       </CardContent>
     </Card>
   );

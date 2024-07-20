@@ -18,7 +18,76 @@ model User {
   isApproved       Boolean   @default(false)
   resetToken       String?
   resetTokenExpiry DateTime?
-  image            String?   // New field for user avatar
+  image            String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  vehicles         Vehicle[]
+}
+
+model Inventory {
+  id              Int                @id @default(autoincrement())
+  partName        String
+  brand           String
+  invoiceNumber   String
+  costPrice       Float
+  sellPrice       Float
+  totalStock      Int
+  partDescription String
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  serviceItems    ServiceInventory[]
+}
+
+model Vehicle {
+  id           Int       @id @default(autoincrement())
+  name         String
+  ownerId      String?
+  owner        User?     @relation(fields: [ownerId], references: [id])
+  licensePlate String    @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  services     Service[]
+}
+
+model Service {
+  id             Int                @id @default(autoincrement())
+  vehicleId      Int
+  vehicle        Vehicle            @relation(fields: [vehicleId], references: [id])
+  status         String             @default("Booked")
+  totalCost      Float              @default(0)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  serviceItems   ServiceItem[]
+  inventoryItems ServiceInventory[]
+  invoice        Invoice?
+}
+
+model ServiceItem {
+  id        Int     @id @default(autoincrement())
+  serviceId Int
+  service   Service @relation(fields: [serviceId], references: [id])
+  name      String
+  price     Float
+}
+
+model ServiceInventory {
+  id          Int       @id @default(autoincrement())
+  serviceId   Int
+  service     Service   @relation(fields: [serviceId], references: [id])
+  inventoryId Int
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  quantity    Int
+
+  @@unique([serviceId, inventoryId])
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  serviceId Int      @unique
+  service   Service  @relation(fields: [serviceId], references: [id])
+  amount    Float
+  status    String   @default("PENDING")
+  sent      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

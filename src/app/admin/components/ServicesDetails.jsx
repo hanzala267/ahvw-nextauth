@@ -1,266 +1,567 @@
-"use client";
-import React, { useState } from "react";
+// import React, { useState, useEffect } from "react";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog";
+// import { Card } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+// import { Skeleton } from "@/components/ui/skeleton";
+// import { Input } from "@/components/ui/input";
+// import { Trash2, Loader2 } from "lucide-react";
+// import toast from "react-hot-toast";
+
+// const ServicesDetails = () => {
+//   const [services, setServices] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [search, setSearch] = useState("");
+//   const [currentStatus, setCurrentStatus] = useState("Booked");
+//   const [changingStatus, setChangingStatus] = useState({});
+//   const [deleting, setDeleting] = useState({});
+
+//   const fetchServices = async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       const res = await fetch(
+//         `/api/admin/services?status=${currentStatus}&search=${search}`
+//       );
+//       if (!res.ok) {
+//         throw new Error("Failed to fetch services");
+//       }
+//       const data = await res.json();
+//       if (!Array.isArray(data)) {
+//         throw new Error("Invalid data received from server");
+//       }
+//       setServices(data);
+//     } catch (error) {
+//       console.error("Error fetching services:", error);
+//       setError(error.message);
+//       toast.error(error.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchServices();
+//   }, [currentStatus, search]);
+
+//   const handleStatusChange = async (serviceId, newStatus) => {
+//     setChangingStatus((prev) => ({ ...prev, [serviceId]: true }));
+//     try {
+//       const res = await fetch(`/api/admin/services/${serviceId}`, {
+//         method: "PUT",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ status: newStatus }),
+//       });
+//       if (!res.ok) {
+//         throw new Error("Failed to update status");
+//       }
+//       toast.success("Status updated successfully");
+//       fetchServices();
+//     } catch (error) {
+//       console.error("Error updating status:", error);
+//       toast.error(error.message);
+//     } finally {
+//       setChangingStatus((prev) => ({ ...prev, [serviceId]: false }));
+//     }
+//   };
+
+//   const handleDeleteService = async (serviceId) => {
+//     setDeleting((prev) => ({ ...prev, [serviceId]: true }));
+//     try {
+//       const res = await fetch(`/api/admin/services/${serviceId}`, {
+//         method: "DELETE",
+//       });
+//       if (!res.ok) {
+//         throw new Error("Failed to delete service");
+//       }
+//       toast.success("Service deleted successfully");
+//       fetchServices();
+//     } catch (error) {
+//       console.error("Error deleting service:", error);
+//       toast.error(error.message);
+//     } finally {
+//       setDeleting((prev) => ({ ...prev, [serviceId]: false }));
+//     }
+//   };
+
+//   const ServiceCard = ({ service }) => (
+//     <Card className="my-3 p-3 hover:scale-105 transition ease-in-out">
+//       <div>
+//         <div className="font-semibold">Service ID: {service.id}</div>
+//         <div className="font-mono">
+//           Vehicle: {service.vehicle?.licensePlate || "N/A"}
+//         </div>
+//         <div>Status: {service.status}</div>
+//         <div>Total Cost: ${service.totalCost?.toFixed(2) || "0.00"}</div>
+//         <Dialog>
+//           <DialogTrigger asChild>
+//             <Button
+//               variant="outline"
+//               className="my-1"
+//               disabled={changingStatus[service.id]}
+//             >
+//               {changingStatus[service.id] ? (
+//                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//               ) : null}
+//               Change Status
+//             </Button>
+//           </DialogTrigger>
+//           <DialogContent>
+//             <DialogHeader>
+//               <DialogTitle>Change Service Status</DialogTitle>
+//               <DialogDescription>
+//                 Select a new status for this service
+//               </DialogDescription>
+//             </DialogHeader>
+//             <select
+//               className="w-full p-2 border rounded"
+//               onChange={(e) => handleStatusChange(service.id, e.target.value)}
+//               defaultValue={service.status}
+//               disabled={changingStatus[service.id]}
+//             >
+//               <option value="Booked">Booked</option>
+//               <option value="Ongoing">Ongoing</option>
+//               <option value="Closed">Closed</option>
+//             </select>
+//           </DialogContent>
+//         </Dialog>
+//         <Button
+//           variant="destructive"
+//           className="ml-2"
+//           onClick={() => handleDeleteService(service.id)}
+//           disabled={deleting[service.id]}
+//         >
+//           {deleting[service.id] ? (
+//             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//           ) : (
+//             <Trash2 size={16} />
+//           )}
+//         </Button>
+//       </div>
+//     </Card>
+//   );
+
+//   const SkeletonCard = () => (
+//     <Card className="my-3 p-3">
+//       <Skeleton className="h-4 w-3/4 mb-2" />
+//       <Skeleton className="h-4 w-1/2 mb-2" />
+//       <Skeleton className="h-4 w-1/4 mb-2" />
+//       <Skeleton className="h-8 w-1/3" />
+//     </Card>
+//   );
+
+//   return (
+//     <div>
+//       <Input
+//         type="text"
+//         placeholder="Search services..."
+//         value={search}
+//         onChange={(e) => setSearch(e.target.value)}
+//         className="mb-4"
+//       />
+//       <Tabs
+//         defaultValue="Booked"
+//         className="w-full justify-center"
+//         onValueChange={setCurrentStatus}
+//       >
+//         <TabsList className="w-full">
+//           <TabsTrigger value="Booked">Booked</TabsTrigger>
+//           <TabsTrigger value="Ongoing">Ongoing</TabsTrigger>
+//           <TabsTrigger value="Closed">Closed</TabsTrigger>
+//         </TabsList>
+
+//         <TabsContent value={currentStatus}>
+//           {loading ? (
+//             Array(3)
+//               .fill()
+//               .map((_, i) => <SkeletonCard key={i} />)
+//           ) : error ? (
+//             <div className="text-red-500">{error}</div>
+//           ) : Array.isArray(services) && services.length > 0 ? (
+//             services.map((service) => (
+//               <ServiceCard key={service.id} service={service} />
+//             ))
+//           ) : (
+//             <div>No services found.</div>
+//           )}
+//         </TabsContent>
+//       </Tabs>
+//     </div>
+//   );
+// };
+
+// export default ServicesDetails;
+
+// import React, { useState, useEffect } from "react";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Card } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+// import { Skeleton } from "@/components/ui/skeleton";
+// import { Input } from "@/components/ui/input";
+// import { Trash2, Loader2 } from "lucide-react";
+// import toast from "react-hot-toast";
+
+// const ServicesDetails = ({ onServiceSelect }) => {
+//   const [services, setServices] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [search, setSearch] = useState("");
+//   const [currentStatus, setCurrentStatus] = useState("Booked");
+//   const [changingStatus, setChangingStatus] = useState({});
+//   const [deleting, setDeleting] = useState({});
+
+//   const fetchServices = async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       const res = await fetch(
+//         `/api/admin/services?status=${currentStatus}&search=${search}`
+//       );
+//       if (!res.ok) {
+//         throw new Error("Failed to fetch services");
+//       }
+//       const data = await res.json();
+//       if (!Array.isArray(data)) {
+//         throw new Error("Invalid data received from server");
+//       }
+//       setServices(data);
+//     } catch (error) {
+//       console.error("Error fetching services:", error);
+//       setError(error.message);
+//       toast.error(error.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchServices();
+//   }, [currentStatus, search]);
+
+//   const handleStatusChange = async (serviceId, newStatus) => {
+//     setChangingStatus((prev) => ({ ...prev, [serviceId]: true }));
+//     try {
+//       const res = await fetch(`/api/admin/services/${serviceId}`, {
+//         method: "PUT",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ status: newStatus }),
+//       });
+//       if (!res.ok) {
+//         throw new Error("Failed to update status");
+//       }
+//       toast.success("Status updated successfully");
+//       fetchServices();
+//     } catch (error) {
+//       console.error("Error updating status:", error);
+//       toast.error(error.message);
+//     } finally {
+//       setChangingStatus((prev) => ({ ...prev, [serviceId]: false }));
+//     }
+//   };
+
+//   const handleDeleteService = async (serviceId) => {
+//     setDeleting((prev) => ({ ...prev, [serviceId]: true }));
+//     try {
+//       const res = await fetch(`/api/admin/services/${serviceId}`, {
+//         method: "DELETE",
+//       });
+//       if (!res.ok) {
+//         throw new Error("Failed to delete service");
+//       }
+//       toast.success("Service deleted successfully");
+//       fetchServices();
+//     } catch (error) {
+//       console.error("Error deleting service:", error);
+//       toast.error(error.message);
+//     } finally {
+//       setDeleting((prev) => ({ ...prev, [serviceId]: false }));
+//     }
+//   };
+
+//   const ServiceCard = ({ service }) => (
+//     <Card className="my-3 p-3 hover:scale-105 transition ease-in-out">
+//       <div>
+//         <div className="font-semibold">Service ID: {service.id}</div>
+//         <div className="font-mono">
+//           Vehicle: {service.vehicle?.licensePlate || "N/A"}
+//         </div>
+//         <div>Status: {service.status}</div>
+//         <div>Total Cost: ${service.totalCost?.toFixed(2) || "0.00"}</div>
+//         <Button
+//           variant="outline"
+//           className="my-1"
+//           onClick={() => onServiceSelect(service.id)}
+//         >
+//           View Invoice
+//         </Button>
+//         <Button
+//           variant="outline"
+//           className="my-1 ml-2"
+//           onClick={() =>
+//             handleStatusChange(
+//               service.id,
+//               service.status === "Booked" ? "Ongoing" : "Closed"
+//             )
+//           }
+//           disabled={changingStatus[service.id]}
+//         >
+//           {changingStatus[service.id] ? (
+//             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//           ) : null}
+//           Change Status
+//         </Button>
+//         <Button
+//           variant="destructive"
+//           className="ml-2"
+//           onClick={() => handleDeleteService(service.id)}
+//           disabled={deleting[service.id]}
+//         >
+//           {deleting[service.id] ? (
+//             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//           ) : (
+//             <Trash2 size={16} />
+//           )}
+//         </Button>
+//       </div>
+//     </Card>
+//   );
+
+//   const SkeletonCard = () => (
+//     <Card className="my-3 p-3">
+//       <Skeleton className="h-4 w-3/4 mb-2" />
+//       <Skeleton className="h-4 w-1/2 mb-2" />
+//       <Skeleton className="h-4 w-1/4 mb-2" />
+//       <Skeleton className="h-8 w-1/3" />
+//     </Card>
+//   );
+
+//   return (
+//     <div>
+//       <Input
+//         type="text"
+//         placeholder="Search services..."
+//         value={search}
+//         onChange={(e) => setSearch(e.target.value)}
+//         className="mb-4"
+//       />
+//       <Tabs
+//         defaultValue="Booked"
+//         className="w-full justify-center"
+//         onValueChange={setCurrentStatus}
+//       >
+//         <TabsList className="w-full">
+//           <TabsTrigger value="Booked">Booked</TabsTrigger>
+//           <TabsTrigger value="Ongoing">Ongoing</TabsTrigger>
+//           <TabsTrigger value="Closed">Closed</TabsTrigger>
+//         </TabsList>
+
+//         <TabsContent value={currentStatus}>
+//           {loading ? (
+//             Array(3)
+//               .fill()
+//               .map((_, i) => <SkeletonCard key={i} />)
+//           ) : error ? (
+//             <div className="text-red-500">{error}</div>
+//           ) : Array.isArray(services) && services.length > 0 ? (
+//             services.map((service) => (
+//               <ServiceCard key={service.id} service={service} />
+//             ))
+//           ) : (
+//             <div>No services found.</div>
+//           )}
+//         </TabsContent>
+//       </Tabs>
+//     </div>
+//   );
+// };
+
+// export default ServicesDetails;
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Trash2, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
-const ServicesDetails = () => {
-  const Services = [
-    {
-      Service_ID: "AMANAT-YV98PN-2023919_1031",
-      Vehicle: "06luhq5j",
-      VIN: "6HJVAWAUS9SE05712",
-      WS_Vehicle_Ref: "AMANAT1",
-      Vehicle_Registration: "YV98PN",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "19/09/2023",
-      Date_Out: "19/09/2023",
-      Status: "Booked",
-      Service_Date: "19/09/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "18/12/2023",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YN52RU-2023919_178",
-      Vehicle: "egg8nwh7",
-      VIN: "6T9T25V9722AFA190",
-      WS_Vehicle_Ref: "AMANAT2",
-      Vehicle_Registration: "YN52RU",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "19/09/2023",
-      Date_Out: "19/09/2023",
-      Status: "Ongoing",
-      Service_Date: "19/09/2023",
-      Service_KM: "",
-      Service_Type: "C Service",
-      Service_Schedule: "",
-      Next_Service_Date: "18/12/2023",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YQ14WC-2023107_178",
-      Vehicle: "cajd6hcx",
-      VIN: "6FH9079DB3M009379",
-      WS_Vehicle_Ref: "AMANAT3",
-      Vehicle_Registration: "YQ14WC",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "07/10/2023",
-      Date_Out: "07/10/2023",
-      Status: "Booked",
-      Service_Date: "07/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "05/01/2024",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YV55GO-20231018_178",
-      Vehicle: "9drcc36a",
-      VIN: "6J6006636DA7W1115",
-      WS_Vehicle_Ref: "AMANAT5",
-      Vehicle_Registration: "YV55GO",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "18/10/2023",
-      Date_Out: "18/10/2023",
-      Status: "Closed",
-      Service_Date: "18/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "16/01/2024",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YV56GO-20231018_178",
-      Vehicle: "fa1anpoh",
-      VIN: "6B90428001WAA6943",
-      WS_Vehicle_Ref: "AMANAT6",
-      Vehicle_Registration: "YV56GO",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "18/10/2023",
-      Date_Out: "18/10/2023",
-      Status: "Booked",
-      Service_Date: "18/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "16/01/2024",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YV32OA-2023107_178",
-      Vehicle: "1r9xrj3q",
-      VIN: "6T9T25V9722AFA214",
-      WS_Vehicle_Ref: "AMANAT7",
-      Vehicle_Registration: "YV32OA",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "07/10/2023",
-      Date_Out: "07/10/2023",
-      Status: "Closed",
-      Service_Date: "07/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "05/01/2024",
-      Next_Service_Type: "A Service",
-    },
-  ];
+const ServicesDetails = ({ onServiceSelect }) => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
+  const [currentStatus, setCurrentStatus] = useState("Booked");
+  const [changingStatus, setChangingStatus] = useState({});
+  const [deleting, setDeleting] = useState({});
 
-  const [selectedService, setSelectedService] = useState(null);
-
-  const handleDialogOpen = (service) => {
-    setSelectedService(service);
+  const fetchServices = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/services?status=${currentStatus}&search=${search}`
+      );
+      if (!res.ok) {
+        throw new Error("Failed to fetch services");
+      }
+      const data = await res.json();
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid data received from server");
+      }
+      setServices(data);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      setError(error.message);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCloseDialog = () => {
-    setSelectedService(null);
+  useEffect(() => {
+    fetchServices();
+  }, [currentStatus, search]);
+
+  const handleStatusChange = async (serviceId, newStatus) => {
+    setChangingStatus((prev) => ({ ...prev, [serviceId]: true }));
+    try {
+      const res = await fetch(`/api/admin/services/${serviceId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to update status");
+      }
+      toast.success("Status updated successfully");
+      fetchServices();
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error(error.message);
+    } finally {
+      setChangingStatus((prev) => ({ ...prev, [serviceId]: false }));
+    }
   };
+
+  const handleDeleteService = async (serviceId) => {
+    setDeleting((prev) => ({ ...prev, [serviceId]: true }));
+    try {
+      const res = await fetch(`/api/admin/services/${serviceId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete service");
+      }
+      toast.success("Service deleted successfully");
+      fetchServices();
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      toast.error(error.message);
+    } finally {
+      setDeleting((prev) => ({ ...prev, [serviceId]: false }));
+    }
+  };
+
+  const ServiceCard = ({ service }) => (
+    <Card className="my-3 p-3 hover:scale-105 transition ease-in-out">
+      <div>
+        <div className="font-semibold">Service ID: {service.id}</div>
+        <div className="font-mono">
+          Vehicle: {service.vehicle?.licensePlate || "N/A"}
+        </div>
+        <div>Status: {service.status}</div>
+        <Button
+          variant="outline"
+          className="my-1"
+          onClick={() => onServiceSelect(service.id)}
+        >
+          View Invoice
+        </Button>
+        <Button
+          variant="outline"
+          className="my-1 ml-2"
+          onClick={() =>
+            handleStatusChange(
+              service.id,
+              service.status === "Booked" ? "Ongoing" : "Closed"
+            )
+          }
+          disabled={changingStatus[service.id]}
+        >
+          {changingStatus[service.id] ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : null}
+          Change Status
+        </Button>
+        <Button
+          variant="destructive"
+          className="ml-2"
+          onClick={() => handleDeleteService(service.id)}
+          disabled={deleting[service.id]}
+        >
+          {deleting[service.id] ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 size={16} />
+          )}
+        </Button>
+      </div>
+    </Card>
+  );
+
+  const SkeletonCard = () => (
+    <Card className="my-3 p-3">
+      <Skeleton className="h-4 w-3/4 mb-2" />
+      <Skeleton className="h-4 w-1/2 mb-2" />
+      <Skeleton className="h-4 w-1/4 mb-2" />
+      <Skeleton className="h-8 w-1/3" />
+    </Card>
+  );
 
   return (
     <div>
-      <Tabs defaultValue="Booked" className="w-full justify-center">
+      <Input
+        type="text"
+        placeholder="Search services..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="mb-4"
+      />
+      <Tabs
+        defaultValue="Booked"
+        className="w-full justify-center"
+        onValueChange={setCurrentStatus}
+      >
         <TabsList className="w-full">
           <TabsTrigger value="Booked">Booked</TabsTrigger>
           <TabsTrigger value="Ongoing">Ongoing</TabsTrigger>
           <TabsTrigger value="Closed">Closed</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="Booked">
-          {Services.map((service) => {
-            if (service.Status === "Booked") {
-              return (
-                <Card
-                  key={service.Service_ID}
-                  className="my-3 p-3 hover:scale-105 transition ease-in-out"
-                >
-                  <div>
-                    <div className="font-semibold">{service.Service_ID}</div>
-                    <div className="font-mono">{service.Vehicle}</div>
-                    <div>Date In: {service.Date_In}</div>
-                    <div>Date Out: {service.Date_Out}</div>
-                    <Dialog>
-                      <DialogTrigger onClick={() => handleDialogOpen(service)}>
-                        <Button variant="outline" className="my-1">
-                          Change Status
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Are you absolutely sure?</DialogTitle>
-                          <DialogDescription>Status change</DialogDescription>
-                        </DialogHeader>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </Card>
-              );
-            }
-            return null;
-          })}
-        </TabsContent>
-
-        <TabsContent value="Ongoing">
-          {Services.map((service) => {
-            if (service.Status === "Ongoing") {
-              return (
-                <Card
-                  key={service.Service_ID}
-                  className="my-3 p-3 hover:scale-105 transition ease-in-out"
-                >
-                  <div>
-                    <div className="font-semibold">{service.Service_ID}</div>
-                    <div className="font-mono">{service.Vehicle}</div>
-                    <div>{service.Date_In}</div>
-                    <div>{service.Date_Out}</div>
-                    <Dialog>
-                      <DialogTrigger onClick={() => handleDialogOpen(service)}>
-                        <Button variant="outline" className="my-1">
-                          Change Status
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Are you absolutely sure?</DialogTitle>
-                          <DialogDescription>Status change</DialogDescription>
-                        </DialogHeader>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </Card>
-              );
-            }
-            return null;
-          })}
-        </TabsContent>
-
-        <TabsContent value="Closed">
-          {Services.map((service) => {
-            if (service.Status === "Closed") {
-              return (
-                <Card
-                  key={service.Service_ID}
-                  className="my-3 p-3 hover:scale-105 transition ease-in-out"
-                >
-                  <div>
-                    <div className="font-semibold">{service.Service_ID}</div>
-                    <div className="font-mono">{service.Vehicle}</div>
-                    <div>{service.Date_In}</div>
-                    <div>{service.Date_Out}</div>
-                    <Dialog>
-                      <DialogTrigger onClick={() => handleDialogOpen(service)}>
-                        <Button variant="outline" className="my-1">
-                          Change Status
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Are you absolutely sure?</DialogTitle>
-                          <DialogDescription>Status change</DialogDescription>
-                        </DialogHeader>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </Card>
-              );
-            }
-            return null;
-          })}
+        <TabsContent value={currentStatus}>
+          {loading ? (
+            Array(3)
+              .fill()
+              .map((_, i) => <SkeletonCard key={i} />)
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : services.length > 0 ? (
+            services.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))
+          ) : (
+            <div>No services found.</div>
+          )}
         </TabsContent>
       </Tabs>
-      <Dialog isOpen={selectedService !== null} onDismiss={handleCloseDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Status</DialogTitle>
-            <DialogDescription>
-              Change the status of the service
-            </DialogDescription>
-          </DialogHeader>
-          <select>
-            <option value="Booked">Booked</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="Closed">Closed</option>
-          </select>
-          <Button onClick={handleCloseDialog}>Close</Button>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
