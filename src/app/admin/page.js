@@ -11,11 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 function AdminDashboard() {
   const [date, setDate] = useState(new Date());
   const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchServices = async () => {
-      setLoading(true); // Set loading to true before fetching data
+      setLoading(true);
       const response = await fetch(
         `/api/admin/services-by-date?date=${date.toISOString()}`
       );
@@ -23,7 +23,7 @@ function AdminDashboard() {
         const data = await response.json();
         setServices(data);
       }
-      setLoading(false); // Set loading to false after fetching data
+      setLoading(false);
     };
 
     fetchServices();
@@ -52,7 +52,7 @@ function AdminDashboard() {
           Services for {date.toLocaleDateString()}
         </h2>
         {loading ? (
-          <Skeleton className="h-48" /> // Add Skeleton component here
+          <Skeleton className="h-48" />
         ) : (
           <Todayservises services={services} />
         )}

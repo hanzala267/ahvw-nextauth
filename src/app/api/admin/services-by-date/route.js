@@ -14,7 +14,10 @@ export async function GET(req) {
   const date = searchParams.get("date");
 
   if (!date) {
-    return NextResponse.json({ error: "Date parameter is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Date parameter is required" },
+      { status: 400 }
+    );
   }
 
   const startOfDay = new Date(date);

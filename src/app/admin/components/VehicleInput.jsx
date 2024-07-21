@@ -26,7 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation"; // Import useRouter
 
 const vehicleSchema = z.object({
@@ -157,6 +157,7 @@ export default function VehicleInput() {
           </form>
         </Form>
       </DialogContent>
+      <Toaster position="top-right" reverseOrder={false} />
     </Dialog>
   );
 }

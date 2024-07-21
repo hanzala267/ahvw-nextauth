@@ -27,8 +27,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusCircle, X } from "lucide-react";
-import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation"; // Import useRouter
+import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const serviceItemSchema = z.object({
   name: z.string().min(1, "Service name is required"),
@@ -55,7 +55,7 @@ export default function ServiceInput() {
   const [inventoryItems, setInventoryItems] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(serviceSchema),
@@ -97,6 +97,7 @@ export default function ServiceInput() {
       setVehicles(data);
     } catch (error) {
       toast.error("Failed to fetch vehicles");
+      console.error("Error fetching vehicles:", error);
     }
   }
 
@@ -108,6 +109,7 @@ export default function ServiceInput() {
       setInventoryItems(data);
     } catch (error) {
       toast.error("Failed to fetch inventory items");
+      console.error("Error fetching inventory items:", error);
     }
   }
 
@@ -120,15 +122,16 @@ export default function ServiceInput() {
         body: JSON.stringify(values),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create service");
+        throw new Error(data.error || "Failed to create service");
       }
 
       toast.success("Service created successfully");
       form.reset();
       setIsOpen(false);
-      router.replace(router.asPath); // Revalidate the path
+      router.refresh();
     } catch (error) {
       toast.error(error.message);
       console.error("Error creating service:", error);
@@ -313,6 +316,7 @@ export default function ServiceInput() {
           </form>
         </Form>
       </DialogContent>
+      <Toaster position="top-right" reverseOrder={false} />
     </Dialog>
   );
 }

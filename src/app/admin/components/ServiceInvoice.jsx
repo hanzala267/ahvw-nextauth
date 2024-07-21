@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 const ServiceInvoice = ({ serviceId }) => {
   const [invoice, setInvoice] = useState(null);
@@ -85,6 +85,8 @@ const ServiceInvoice = ({ serviceId }) => {
 
   return (
     <section className="grid md:grid-cols-1 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
+      <Toaster position="top-right" reverseOrder={false} />
+
       <Card>
         <CardHeader>
           <CardTitle className="text-3xl">Invoice</CardTitle>

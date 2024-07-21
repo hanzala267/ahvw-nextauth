@@ -59,6 +59,46 @@ export async function PUT(req, { params }) {
 }
 
 //
+// export async function DELETE(req, { params }) {
+//   const session = await getServerSession(authOptions);
+
+//   if (!session || session.user.role !== "admin") {
+//     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+//   }
+
+//   const { id } = params;
+
+//   try {
+//     // Start a transaction
+//     const result = await prisma.$transaction(async (prisma) => {
+//       // Delete related ServiceItems
+//       await prisma.serviceItem.deleteMany({
+//         where: { serviceId: parseInt(id, 10) },
+//       });
+
+//       // Delete related ServiceInventory items
+//       await prisma.serviceInventory.deleteMany({
+//         where: { serviceId: parseInt(id, 10) },
+//       });
+
+//       // Delete the Service
+//       await prisma.service.delete({
+//         where: { id: parseInt(id, 10) },
+//       });
+//     });
+
+//     return NextResponse.json({
+//       message: "Service and related items deleted successfully",
+//     });
+//   } catch (error) {
+//     console.error("Error deleting service:", error);
+//     return NextResponse.json(
+//       { error: "Failed to delete service" },
+//       { status: 500 }
+//     );
+//   }
+// }
+
 export async function DELETE(req, { params }) {
   const session = await getServerSession(authOptions);
 
@@ -71,6 +111,11 @@ export async function DELETE(req, { params }) {
   try {
     // Start a transaction
     const result = await prisma.$transaction(async (prisma) => {
+      // Delete the Invoice associated with the Service
+      await prisma.invoice.delete({
+        where: { serviceId: parseInt(id, 10) },
+      });
+
       // Delete related ServiceItems
       await prisma.serviceItem.deleteMany({
         where: { serviceId: parseInt(id, 10) },
@@ -88,7 +133,7 @@ export async function DELETE(req, { params }) {
     });
 
     return NextResponse.json({
-      message: "Service and related items deleted successfully",
+      message: "Service, related items, and invoice deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting service:", error);
