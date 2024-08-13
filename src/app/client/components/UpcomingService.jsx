@@ -8,16 +8,23 @@ import {
 
 export default function UpcomingServices({ service }) {
   return (
-    <Card classname="my-2">
+    <Card className="my-2">
       <CardHeader>
-        <CardTitle>Upcoming Service</CardTitle>
+        <CardTitle>Booked Service</CardTitle>
         <CardDescription>
           <div>Service ID: {service.id}</div>
-          <div>Service Name: {service.name}</div>
-          <div>Date In: {service.dateIn}</div>
-          <div>Date Out: {service.dateOut}</div>
+          <div>
+            Vehicle: {service.vehicle.name} ({service.vehicle.licensePlate})
+          </div>
+          <div>Status: {service.status}</div>
+          <div>
+            Created At: {new Date(service.createdAt).toLocaleDateString()}
+          </div>
+          <div>
+            Updated At: {new Date(service.updatedAt).toLocaleDateString()}
+          </div>
+          <div>Total Cost: ${service.totalCost.toFixed(2)}</div>
         </CardDescription>
-        {/* <Button className="my-3">See Details</Button> */}
       </CardHeader>
     </Card>
   );

@@ -1,205 +1,141 @@
 "use client";
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
+
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import toast from "react-hot-toast";
+import useServiceStore from "@/stores/useServiceStore";
 
-const ServicesDetails = () => {
-  const Services = [
-    {
-      Service_ID: "AMANAT-YV98PN-2023919_1031",
-      Vehicle: "06luhq5j",
-      VIN: "6HJVAWAUS9SE05712",
-      WS_Vehicle_Ref: "AMANAT1",
-      Vehicle_Registration: "YV98PN",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "19/09/2023",
-      Date_Out: "19/09/2023",
-      Status: "Booked",
-      Service_Date: "19/09/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "18/12/2023",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YN52RU-2023919_178",
-      Vehicle: "egg8nwh7",
-      VIN: "6T9T25V9722AFA190",
-      WS_Vehicle_Ref: "AMANAT2",
-      Vehicle_Registration: "YN52RU",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "19/09/2023",
-      Date_Out: "19/09/2023",
-      Status: "Ongoing",
-      Service_Date: "19/09/2023",
-      Service_KM: "",
-      Service_Type: "C Service",
-      Service_Schedule: "",
-      Next_Service_Date: "18/12/2023",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YQ14WC-2023107_178",
-      Vehicle: "cajd6hcx",
-      VIN: "6FH9079DB3M009379",
-      WS_Vehicle_Ref: "AMANAT3",
-      Vehicle_Registration: "YQ14WC",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "07/10/2023",
-      Date_Out: "07/10/2023",
-      Status: "Booked",
-      Service_Date: "07/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "05/01/2024",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YV55GO-20231018_178",
-      Vehicle: "9drcc36a",
-      VIN: "6J6006636DA7W1115",
-      WS_Vehicle_Ref: "AMANAT5",
-      Vehicle_Registration: "YV55GO",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "18/10/2023",
-      Date_Out: "18/10/2023",
-      Status: "Closed",
-      Service_Date: "18/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "16/01/2024",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YV56GO-20231018_178",
-      Vehicle: "fa1anpoh",
-      VIN: "6B90428001WAA6943",
-      WS_Vehicle_Ref: "AMANAT6",
-      Vehicle_Registration: "YV56GO",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "18/10/2023",
-      Date_Out: "18/10/2023",
-      Status: "Booked",
-      Service_Date: "18/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "16/01/2024",
-      Next_Service_Type: "A Service",
-    },
-    {
-      Service_ID: "AMANAT-YV32OA-2023107_178",
-      Vehicle: "1r9xrj3q",
-      VIN: "6T9T25V9722AFA214",
-      WS_Vehicle_Ref: "AMANAT7",
-      Vehicle_Registration: "YV32OA",
-      Customer: "Amanat Transport Pty Ltd",
-      Customer_Nickname: "AMANAT",
-      Date_In: "07/10/2023",
-      Date_Out: "07/10/2023",
-      Status: "Closed",
-      Service_Date: "07/10/2023",
-      Service_KM: "",
-      Service_Type: "A Service",
-      Service_Schedule: "",
-      Next_Service_Date: "05/01/2024",
-      Next_Service_Type: "A Service",
-    },
-  ];
+const ServiceDetails = ({ service }) => {
+  const { data: session } = useSession();
+  const [newHours, setNewHours] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const {
+    serviceHours,
+    setServiceHours,
+    hasAddedHours,
+    setHasAddedHours,
+    resetHasAddedHours,
+  } = useServiceStore();
 
-  const [selectedService, setSelectedService] = useState(null);
+  useEffect(() => {
+    const fetchServiceHours = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `/api/employee/service-hours/${service.id}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setServiceHours(data);
+          if (data.length > 0) {
+            setHasAddedHours(true);
+          } else {
+            resetHasAddedHours();
+          }
+        } else {
+          console.error("Failed to fetch service hours");
+          toast.error("Failed to fetch service hours");
+        }
+      } catch (error) {
+        console.error("Error fetching service hours:", error);
+        toast.error("Error fetching service hours");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleDialogOpen = (service) => {
-    setSelectedService(service);
+    fetchServiceHours();
+  }, [service.id, setServiceHours, setHasAddedHours, resetHasAddedHours]);
+
+  const handleAddServiceHours = async () => {
+    try {
+      const response = await fetch("/api/employee/service-hours", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          serviceId: service.id,
+          hours: parseFloat(newHours),
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setServiceHours([...serviceHours, data]);
+        setNewHours(0);
+        setHasAddedHours(true);
+        toast.success("Service hours added successfully");
+      } else {
+        console.error("Failed to create service hours");
+        toast.error("Failed to add service hours");
+      }
+    } catch (error) {
+      console.error("Error creating service hours:", error);
+      toast.error("Error adding service hours");
+    }
   };
-
-  const handleCloseDialog = () => {
-    setSelectedService(null);
-  };
-
-  const renderServiceCard = (service) => (
-    <Card
-      key={service.Service_ID}
-      className="my-3 p-3 hover:scale-105 transition ease-in-out"
-    >
-      <div>
-        <div className="font-semibold">{service.Service_ID}</div>
-        <div className="font-mono">{service.Vehicle}</div>
-        <div>Date In: {service.Date_In}</div>
-        <div>Date Out: {service.Date_Out}</div>
-        <Dialog>
-          <DialogTrigger onClick={() => handleDialogOpen(service)}>
-            <Button variant="outline" className="my-1">
-              Change Status
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Are you absolutely sure?</DialogTitle>
-              <DialogDescription>Status change</DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </Card>
-  );
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Service Details</h2>
+      <div className="space-y-4">
         <div>
-          <h2 className="text-xl font-bold mb-4 text-center">Ongoing</h2>
-          {Services.filter((service) => service.Status === "Ongoing").map(
-            renderServiceCard
-          )}
+          <label htmlFor="license-plate" className="block font-medium">
+            License Plate
+          </label>
+          <p>{service.vehicle.licensePlate}</p>
         </div>
         <div>
-          <h2 className="text-xl font-bold mb-4 text-center">Booked</h2>
-          {Services.filter((service) => service.Status === "Booked").map(
-            renderServiceCard
-          )}
+          <label htmlFor="status" className="block font-medium">
+            Status
+          </label>
+          <p>{service.status}</p>
         </div>
+
         <div>
-          <h2 className="text-xl font-bold mb-4 text-center">Closed</h2>
-          {Services.filter((service) => service.Status === "Closed").map(
-            renderServiceCard
+          <label htmlFor="service-hours" className="block font-medium">
+            Service Hours
+          </label>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ) : (
+            <ul className="list-disc pl-5">
+              {serviceHours.map((sh) => (
+                <li key={sh.id}>
+                  {sh.hours} hours added on{" "}
+                  {new Date(sh.createdAt).toLocaleDateString()}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
+
+        {!hasAddedHours && (
+          <div>
+            <label htmlFor="new-hours" className="block font-medium">
+              Add Hours
+            </label>
+            <div className="flex items-center space-x-2">
+              <Input
+                type="number"
+                id="new-hours"
+                value={newHours}
+                onChange={(e) => setNewHours(e.target.value)}
+                min="0"
+              />
+              <Button onClick={handleAddServiceHours}>Add Hours</Button>
+            </div>
+          </div>
+        )}
       </div>
-      <Dialog isOpen={selectedService !== null} onDismiss={handleCloseDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Status</DialogTitle>
-            <DialogDescription>
-              Change the status of the service
-            </DialogDescription>
-          </DialogHeader>
-          <select>
-            <option value="Booked">Booked</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="Closed">Closed</option>
-          </select>
-          <Button onClick={handleCloseDialog}>Close</Button>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
 
-export default ServicesDetails;
+export default ServiceDetails;

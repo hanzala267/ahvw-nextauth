@@ -37,6 +37,7 @@ export async function GET(req) {
         vehicle: true,
       },
     });
+    console.log(services);
     return NextResponse.json(services);
   } catch (error) {
     console.error("Error fetching services:", error);

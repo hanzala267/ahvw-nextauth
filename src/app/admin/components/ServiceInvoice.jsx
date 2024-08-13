@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import useInvoiceStore from "@/app/stores/invoiceStore";
 
 const ServiceInvoice = ({ serviceId }) => {
-  const [invoice, setInvoice] = useState(null);
+  const { selectedInvoice, setSelectedInvoice, updateInvoiceStatus } =
+    useInvoiceStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sending, setSending] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (serviceId) {
@@ -26,7 +29,7 @@ const ServiceInvoice = ({ serviceId }) => {
         throw new Error("Failed to fetch invoice");
       }
       const data = await res.json();
-      setInvoice(data);
+      setSelectedInvoice(data);
     } catch (error) {
       console.error("Error fetching invoice:", error);
       setError(error.message);
@@ -44,7 +47,7 @@ const ServiceInvoice = ({ serviceId }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ invoiceId: invoice.id }),
+        body: JSON.stringify({ invoiceId: selectedInvoice.id }),
       });
 
       if (!res.ok) {
@@ -57,6 +60,35 @@ const ServiceInvoice = ({ serviceId }) => {
       toast.error("Failed to send invoice");
     } finally {
       setSending(false);
+    }
+  };
+
+  const updateStatus = async () => {
+    setUpdating(true);
+    try {
+      const res = await fetch(
+        `/api/admin/invoice/updateStatus/${selectedInvoice.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "PAID" }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to update invoice status");
+      }
+
+      const updatedInvoice = await res.json();
+      updateInvoiceStatus(selectedInvoice.id, "PAID");
+      toast.success("Invoice status updated to PAID");
+    } catch (error) {
+      console.error("Error updating invoice status:", error);
+      toast.error("Failed to update invoice status");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -75,7 +107,7 @@ const ServiceInvoice = ({ serviceId }) => {
     return <div className="text-red-500">{error}</div>;
   }
 
-  if (!invoice) {
+  if (!selectedInvoice) {
     return <div>No invoice selected</div>;
   }
 
@@ -101,21 +133,27 @@ const ServiceInvoice = ({ serviceId }) => {
                 </p>
                 <div className="grid grid-cols-[100px_1fr] gap-2">
                   <span className="font-medium">Invoice #:</span>
-                  <span>{invoice.id || "N/A"}</span>
+                  <span>{selectedInvoice.id || "N/A"}</span>
                   <span className="font-medium">Service ID:</span>
-                  <span>{invoice.serviceId || "N/A"}</span>
+                  <span>{selectedInvoice.serviceId || "N/A"}</span>
                   <span className="font-medium">Date:</span>
                   <span>{new Date().toISOString().split("T")[0]}</span>
                   <span className="font-medium">Customer:</span>
-                  <span>{`${invoice.service?.vehicle?.owner?.firstName || ""} ${
-                    invoice.service?.vehicle?.owner?.lastName || ""
+                  <span>{`${
+                    selectedInvoice.service?.vehicle?.owner?.firstName || ""
+                  } ${
+                    selectedInvoice.service?.vehicle?.owner?.lastName || ""
                   }`}</span>
                   <span className="font-medium">Email:</span>
-                  <span>{invoice.service?.vehicle?.owner?.email || "N/A"}</span>
+                  <span>
+                    {selectedInvoice.service?.vehicle?.owner?.email || "N/A"}
+                  </span>
                   <span className="font-medium">Vehicle:</span>
-                  <span>{invoice.service?.vehicle?.licensePlate || "N/A"}</span>
+                  <span>
+                    {selectedInvoice.service?.vehicle?.licensePlate || "N/A"}
+                  </span>
                   <span className="font-medium">Status:</span>
-                  <span>{invoice.status || "N/A"}</span>
+                  <span>{selectedInvoice.status || "N/A"}</span>
                 </div>
               </div>
             </div>
@@ -128,7 +166,7 @@ const ServiceInvoice = ({ serviceId }) => {
                     <span className="font-medium">Service</span>
                     <span className="font-medium text-right">Price</span>
                   </div>
-                  {invoice.service?.serviceItems?.map((item, index) => (
+                  {selectedInvoice.service?.serviceItems?.map((item, index) => (
                     <div
                       key={index}
                       className="grid grid-cols-[1fr_80px] items-center gap-4"
@@ -151,22 +189,28 @@ const ServiceInvoice = ({ serviceId }) => {
                     <span className="font-medium text-right">Unit Price</span>
                     <span className="font-medium text-right">Total Price</span>
                   </div>
-                  {invoice.service?.inventoryItems?.map((item, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-[1fr_80px_80px_80px] items-center gap-4"
-                    >
-                      <span>{item.inventory?.partName || "Unknown Part"}</span>
-                      <span className="text-right">{item.quantity || 0}</span>
-                      <span className="text-right">
-                        ${formatPrice(item.inventory?.sellPrice)}
-                      </span>
-                      <span className="text-right">
-                        $
-                        {formatPrice(item.inventory?.sellPrice * item.quantity)}
-                      </span>
-                    </div>
-                  )) || <div>No inventory items</div>}
+                  {selectedInvoice.service?.inventoryItems?.map(
+                    (item, index) => (
+                      <div
+                        key={index}
+                        className="grid grid-cols-[1fr_80px_80px_80px] items-center gap-4"
+                      >
+                        <span>
+                          {item.inventory?.partName || "Unknown Part"}
+                        </span>
+                        <span className="text-right">{item.quantity || 0}</span>
+                        <span className="text-right">
+                          ${formatPrice(item.inventory?.sellPrice)}
+                        </span>
+                        <span className="text-right">
+                          $
+                          {formatPrice(
+                            item.inventory?.sellPrice * item.quantity
+                          )}
+                        </span>
+                      </div>
+                    )
+                  ) || <div>No inventory items</div>}
                 </div>
               </div>
 
@@ -174,14 +218,14 @@ const ServiceInvoice = ({ serviceId }) => {
                 <div className="grid grid-cols-[1fr_80px] items-center gap-4">
                   <span className="font-medium">Total Amount</span>
                   <span className="text-right font-bold text-lg">
-                    ${formatPrice(invoice.amount)}
+                    ${formatPrice(selectedInvoice.amount)}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 space-y-2">
             <Button onClick={sendInvoice} disabled={sending} className="w-full">
               {sending ? (
                 <>
@@ -190,6 +234,21 @@ const ServiceInvoice = ({ serviceId }) => {
                 </>
               ) : (
                 "Send Invoice"
+              )}
+            </Button>
+
+            <Button
+              onClick={updateStatus}
+              disabled={updating || selectedInvoice.status === "PAID"}
+              className="w-full"
+            >
+              {updating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                `Mark as ${selectedInvoice.status === "PAID" ? "Paid" : "Paid"}`
               )}
             </Button>
           </div>

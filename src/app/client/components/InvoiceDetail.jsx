@@ -1,8 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function InvoiceDetail({ invoice }) {
-  const isPaid = invoice.status === "paid"; // Assuming there's a 'status' field in the invoice object
+  if (!invoice) {
+    return <InvoiceDetailSkeleton />;
+  }
+
+  const isPaid = invoice.status === "paid";
 
   return (
     <section className="grid md:grid-cols-1 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
@@ -16,7 +21,7 @@ export default function InvoiceDetail({ invoice }) {
               }
               variant="default"
             >
-              {isPaid ? "Paid" : "Unpaid"}
+              {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
             </Badge>
           </div>
           <div className="grid gap-2 text-sm leading-loose">
@@ -43,8 +48,8 @@ export default function InvoiceDetail({ invoice }) {
               <div className="grid grid-cols-[1fr_80px_80px_80px] items-center gap-4">
                 <span className="font-medium">Part Name</span>
                 <span className="font-medium text-right">Qty</span>
-                <span className="font-medium text-right">Price</span>
-                <span className="font-medium text-right">Tax</span>
+                <span className="font-medium text-right">Unit Price</span>
+                <span className="font-medium text-right">Total Price</span>
               </div>
               {invoice.parts.map((part, index) => (
                 <div
@@ -54,25 +59,14 @@ export default function InvoiceDetail({ invoice }) {
                   <span>{part.name}</span>
                   <span className="text-right">{part.qty}</span>
                   <span className="text-right">{part.price}</span>
-                  <span className="text-right">{part.tax}</span>
+                  <span className="text-right">
+                    $
+                    {(
+                      part.qty * parseFloat(part.price.replace("$", ""))
+                    ).toFixed(2)}
+                  </span>
                 </div>
               ))}
-            </div>
-          </div>
-          <div className="grid gap-2 border-t border-gray-200 pt-2 dark:border-gray-800">
-            <div className="grid grid-cols-[1fr_80px_80px_80px] items-center gap-4">
-              <span className="font-medium">Subtotal</span>
-              <span />
-              <span className="text-right">{invoice.subtotal}</span>
-              <span className="text-right">{invoice.tax}</span>
-            </div>
-            <div className="grid grid-cols-[1fr_80px_80px_80px] items-center gap-4">
-              <span className="font-medium">Total</span>
-              <span />
-              <span className="text-right font-bold text-lg">
-                {invoice.total}
-              </span>
-              <span />
             </div>
           </div>
         </div>
@@ -95,22 +89,29 @@ export default function InvoiceDetail({ invoice }) {
                 <span className="text-right">{service.price}</span>
               </div>
             ))}
-            <div className="grid grid-cols-[100px_1fr_80px] gap-2">
-              <span className="font-medium">Parts:</span>
-              <span>{invoice.subtotal}</span>
-              <span className="text-right">{invoice.tax}</span>
-            </div>
-            <div className="grid grid-cols-[100px_1fr_80px] gap-2">
-              <span className="font-medium">Total:</span>
-              <span className="font-bold">{invoice.total}</span>
-              <span />
-            </div>
           </div>
         </div>
-        <Button className="w-full" size="lg">
-          Send Invoice
-        </Button>
+
+        <div className="grid gap-2 border-t border-gray-200 pt-2 dark:border-gray-800">
+          <div className="grid grid-cols-[1fr_80px_80px_80px] items-center gap-4">
+            <span className="font-medium">total</span>
+            <span />
+            <span className="text-right font-bold">{invoice.subtotal}</span>
+          </div>
+        </div>
       </div>
     </section>
+  );
+}
+
+function InvoiceDetailSkeleton() {
+  return (
+    <div className="p-4">
+      <Skeleton className="h-10 w-1/3 mb-4" />
+      <Skeleton className="h-6 w-full mb-2" />
+      <Skeleton className="h-6 w-full mb-2" />
+      <Skeleton className="h-6 w-full mb-2" />
+      <Skeleton className="h-10 w-1/4 mt-4" />
+    </div>
   );
 }

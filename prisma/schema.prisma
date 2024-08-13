@@ -22,6 +22,9 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   vehicles         Vehicle[]
+  employeeHours    EmployeeHours[]
+  employeeStats    EmployeeStats[]
+  comments         Comment[]
 }
 
 model Inventory {
@@ -57,9 +60,12 @@ model Service {
   totalCost      Float              @default(0)
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+  completionDate DateTime?
   serviceItems   ServiceItem[]
   inventoryItems ServiceInventory[]
   invoice        Invoice?
+  employeeHours  EmployeeHours[]
+  comments       Comment[]
 }
 
 model ServiceItem {
@@ -90,4 +96,40 @@ model Invoice {
   sent      Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model EmployeeHours {
+  id         Int      @id @default(autoincrement())
+  employeeId String   @map("employeeId")
+  employee   User     @relation(fields: [employeeId], references: [id])
+  serviceId  Int
+  service    Service  @relation(fields: [serviceId], references: [id])
+  hours      Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([employeeId, serviceId])
+}
+
+model EmployeeStats {
+  id         Int      @id @default(autoincrement())
+  employeeId String
+  employee   User     @relation(fields: [employeeId], references: [id])
+  date       DateTime @default(now())
+  hours      Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([employeeId, date])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  serviceId Int
+  service   Service  @relation(fields: [serviceId], references: [id])
 }

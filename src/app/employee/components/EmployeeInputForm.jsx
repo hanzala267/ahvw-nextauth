@@ -1,28 +1,43 @@
 import React, { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-} from "@/components/ui/dropdown-menu";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "react-hot-toast";
+import { z } from "zod";
+import useEmployeeStore from "@/stores/employeeStore";
 
-const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const hoursSchema = z.number().min(0).max(12);
 
-const EmployeeInputForm = ({ onSubmit }) => {
-  const [day, setDay] = useState("");
+const EmployeeInputForm = () => {
   const [hours, setHours] = useState("");
+  const { setIsLoading, addWeeklyHours } = useEmployeeStore();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (day && hours) {
-      onSubmit({ day, hours: Number(hours) });
-      setDay("");
-      setHours("");
+    try {
+      hoursSchema.parse(Number(hours));
+      setIsLoading(true);
+      const response = await fetch("/api/employee/add-hours", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hours: Number(hours) }),
+      });
+
+      if (response.ok) {
+        toast.success("Hours added successfully");
+        setHours("");
+
+        // Add the new hours to the chart instantly
+        addWeeklyHours(Number(hours));
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Failed to add hours");
+      }
+    } catch (error) {
+      toast.error(error.message || "Invalid input");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -34,36 +49,17 @@ const EmployeeInputForm = ({ onSubmit }) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4 w-full">
           <div className="grid gap-2">
-            <Label htmlFor="day">Day</Label>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                  {day ? day : "Select a day"}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuContent className="z-50 min-w-[8rem] overflow-hidden rounded-md border bg-white p-1 text-black shadow-lg">
-                  {daysOfWeek.map((dayOfWeek) => (
-                    <DropdownMenuItem
-                      key={dayOfWeek}
-                      onSelect={() => setDay(dayOfWeek)}
-                      className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground"
-                    >
-                      {dayOfWeek}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenuPortal>
-            </DropdownMenu>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="hours">Hours</Label>
+            <Label htmlFor="hours">Hours (0-12)</Label>
             <Input
               id="hours"
               type="number"
               value={hours}
               onChange={(e) => setHours(e.target.value)}
               placeholder="e.g. 8"
+              min="0"
+              max="12"
+              step="0.5"
+              required
             />
           </div>
           <Button className="w-full" type="submit">

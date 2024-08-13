@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/app/client/components/Navbar";
 import InvoiceDetail from "@/app/client/components/InvoiceDetail";
 import { Button } from "@/components/ui/button";
@@ -11,70 +11,84 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 
-const paidInvoices = [
-  {
-    id: "INV-2023-05-25",
-    date: "2023-05-25",
-    client: "Jared Palmer",
-    address: "123 Main St, Anytown USA",
-    parts: [
-      { name: "Brake Pads", qty: 2, price: "$49.99", tax: "$7.00" },
-      { name: "Oil Filter", qty: 1, price: "$24.99", tax: "$1.75" },
-      { name: "Air Filter", qty: 1, price: "$19.99", tax: "$0.00" },
-    ],
-    subtotal: "$94.97",
-    tax: "$8.75",
-    total: "$103.72",
-    services: [{ name: "Oil Change", price: "$59.99" }],
-    status: "paid",
-  },
-  // Add more paid invoices here
-];
-
-const unpaidInvoices = [
-  {
-    id: "INV-2023-06-25",
-    date: "2023-06-25",
-    client: "Alice Johnson",
-    address: "456 Elm St, Anytown USA",
-    parts: [
-      { name: "Brake Pads", qty: 2, price: "$49.99", tax: "$7.00" },
-      { name: "Oil Filter", qty: 1, price: "$24.99", tax: "$1.75" },
-      { name: "Air Filter", qty: 1, price: "$19.99", tax: "$0.00" },
-    ],
-    subtotal: "$94.97",
-    tax: "$8.75",
-    total: "$103.72",
-    services: [{ name: "Oil Change", price: "$59.99" }],
-    status: "unpaid",
-  },
-  {
-    id: "INV-2023-06-25",
-    date: "2023-06-25",
-    client: "Alice Johnson",
-    address: "456 Elm St, Anytown USA",
-    parts: [
-      { name: "Brake Pads", qty: 2, price: "$49.99", tax: "$7.00" },
-      { name: "Oil Filter", qty: 1, price: "$24.99", tax: "$1.75" },
-      { name: "Air Filter", qty: 1, price: "$19.99", tax: "$0.00" },
-    ],
-    subtotal: "$94.97",
-    tax: "$8.75",
-    total: "$103.72",
-    services: [{ name: "Oil Change", price: "$59.99" }],
-    status: "unpaid",
-  },
-  // Add more unpaid invoices here
-];
-
 function InvoicesPage() {
+  const [invoices, setInvoices] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const fetchInvoices = async () => {
+    try {
+      const response = await fetch("/api/customer/invoices");
+      if (!response.ok) {
+        throw new Error("Failed to fetch invoices");
+      }
+      const data = await response.json();
+      setInvoices(data);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInvoiceClick = (invoice) => {
     setSelectedInvoice(invoice);
   };
+
+  const renderInvoiceCard = (invoice) => (
+    <Card key={invoice.id}>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>
+            {invoice.status === "paid" ? "Paid Invoice" : "Unpaid Invoice"}
+          </CardTitle>
+          <Badge
+            className={
+              invoice.status === "paid"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }
+            variant="default"
+          >
+            {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+          </Badge>
+        </div>
+        <CardDescription>
+          <div>Invoice ID: {invoice.id}</div>
+          <div>Client: {invoice.client}</div>
+          <div>Date: {invoice.date}</div>
+          <div>Total: {invoice.total}</div>
+        </CardDescription>
+        <Button className="my-3" onClick={() => handleInvoiceClick(invoice)}>
+          See Details
+        </Button>
+      </CardHeader>
+    </Card>
+  );
+
+  const renderSkeletonCard = () => (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-6 w-1/3 mb-2" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-10 w-1/3 mt-3" />
+      </CardHeader>
+    </Card>
+  );
+
+  const paidInvoices = invoices.filter((invoice) => invoice.status === "paid");
+  const unpaidInvoices = invoices.filter(
+    (invoice) => invoice.status !== "paid"
+  );
 
   return (
     <div>
@@ -85,63 +99,35 @@ function InvoicesPage() {
             <div className="text-2xl font-bold my-6 mx-auto text-center">
               Paid Invoices
             </div>
-            {paidInvoices.map((invoice) => (
-              <Card key={invoice.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>Paid Invoice</CardTitle>
-                    <Badge
-                      className="bg-green-500 text-white"
-                      variant="default"
-                    >
-                      Paid
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    <div>Invoice ID: {invoice.id}</div>
-                    <div>Client: {invoice.client}</div>
-                    <div>Date: {invoice.date}</div>
-                  </CardDescription>
-                  <Button
-                    className="my-3"
-                    onClick={() => handleInvoiceClick(invoice)}
-                  >
-                    See Details
-                  </Button>
-                </CardHeader>
-              </Card>
-            ))}
+            {loading
+              ? Array(3)
+                  .fill(0)
+                  .map((_, index) => (
+                    <div key={index}>{renderSkeletonCard()}</div>
+                  ))
+              : paidInvoices.map(renderInvoiceCard)}
+            {!loading && paidInvoices.length === 0 && (
+              <p className="text-center text-gray-500">
+                No paid invoices found.
+              </p>
+            )}
           </div>
           <div>
             <div className="text-2xl font-bold my-6 mx-auto text-center">
               Unpaid Invoices
             </div>
-            {unpaidInvoices.map((invoice) => (
-              <Card key={invoice.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>Unpaid Invoice</CardTitle>
-                    <Badge className="bg-red-500 text-white" variant="default">
-                      Unpaid
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    <div>Invoice ID: {invoice.id}</div>
-                    <div>Client: {invoice.client}</div>
-                    <div>Date: {invoice.date}</div>
-                    <div>
-                      Due Date: {new Date(invoice.date).toLocaleDateString()}
-                    </div>
-                  </CardDescription>
-                  <Button
-                    className="my-3"
-                    onClick={() => handleInvoiceClick(invoice)}
-                  >
-                    See Details
-                  </Button>
-                </CardHeader>
-              </Card>
-            ))}
+            {loading
+              ? Array(3)
+                  .fill(0)
+                  .map((_, index) => (
+                    <div key={index}>{renderSkeletonCard()}</div>
+                  ))
+              : unpaidInvoices.map(renderInvoiceCard)}
+            {!loading && unpaidInvoices.length === 0 && (
+              <p className="text-center text-gray-500">
+                No unpaid invoices found.
+              </p>
+            )}
           </div>
         </div>
         {selectedInvoice && <InvoiceDetail invoice={selectedInvoice} />}

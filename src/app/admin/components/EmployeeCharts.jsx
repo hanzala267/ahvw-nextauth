@@ -1,4 +1,5 @@
-import React from "react";
+// File: app/admin/components/EmployeeCharts.js
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -11,18 +12,47 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const SpendingCharts = ({ weeklyData, monthlyData }) => {
+const EmployeeCharts = ({ employeeId }) => {
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [monthlyData, setMonthlyData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [weeklyResponse, monthlyResponse] = await Promise.all([
+          fetch(`/api/admin/employees/weekly-stats/${employeeId}`),
+          fetch(`/api/admin/employees/monthly-stats/${employeeId}`),
+        ]);
+
+        if (weeklyResponse.ok && monthlyResponse.ok) {
+          const weeklyData = await weeklyResponse.json();
+          const monthlyData = await monthlyResponse.json();
+          setWeeklyData(weeklyData);
+          setMonthlyData(monthlyData);
+        } else {
+          console.error("Error fetching data");
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    if (employeeId) {
+      fetchData();
+    }
+  }, [employeeId]);
+
   return (
     <div className="container mx-auto p-4">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium text-black">
-          Employee Spending Hours
+          Employee Working Hours
         </h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white p-2 sm:p-6 shadow-md rounded-lg">
           <h2 className="text-xl font-medium text-center mb-4 text-black">
-            Weekly Spending Hours
+            Weekly Working Hours
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={weeklyData}>
@@ -30,13 +60,13 @@ const SpendingCharts = ({ weeklyData, monthlyData }) => {
               <XAxis dataKey="day" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="hours" fill="##2F2F31" />
+              <Bar dataKey="hours" fill="#2F2F31" />
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="bg-white p-2 sm:p-6 shadow-md rounded-lg">
           <h2 className="text-xl font-medium text-center mb-4 text-gray-800">
-            Monthly Spending Hours
+            Monthly Working Hours
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={monthlyData}>
@@ -58,4 +88,4 @@ const SpendingCharts = ({ weeklyData, monthlyData }) => {
   );
 };
 
-export default SpendingCharts;
+export default EmployeeCharts;

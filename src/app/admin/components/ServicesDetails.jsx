@@ -6,9 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Trash2, Loader2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import useInvoiceStore from "@/app/stores/invoiceStore";
+import CommentsComponent from "@/app/admin/components/CommentsComponent";
 
 const ServicesDetails = ({ onServiceSelect }) => {
-  const [services, setServices] = useState([]);
+  const { invoices, setInvoices, updateInvoiceStatus } = useInvoiceStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
@@ -30,7 +32,7 @@ const ServicesDetails = ({ onServiceSelect }) => {
       if (!Array.isArray(data)) {
         throw new Error("Invalid data received from server");
       }
-      setServices(data);
+      setInvoices(data);
     } catch (error) {
       console.error("Error fetching services:", error);
       setError(error.message);
@@ -129,6 +131,8 @@ const ServicesDetails = ({ onServiceSelect }) => {
             <Trash2 size={16} />
           )}
         </Button>
+
+        <CommentsComponent serviceId={service.id} />
       </div>
     </Card>
   );
@@ -161,20 +165,55 @@ const ServicesDetails = ({ onServiceSelect }) => {
           <TabsTrigger value="Ongoing">Ongoing</TabsTrigger>
           <TabsTrigger value="Closed">Closed</TabsTrigger>
         </TabsList>
-
-        <TabsContent value={currentStatus}>
+        <TabsContent value="Booked">
           {loading ? (
-            Array(3)
-              .fill()
-              .map((_, i) => <SkeletonCard key={i} />)
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
           ) : error ? (
             <div className="text-red-500">{error}</div>
-          ) : services.length > 0 ? (
-            services.map((service) => (
+          ) : invoices.length > 0 ? (
+            invoices.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))
           ) : (
-            <div>No services found.</div>
+            <div>No booked services found.</div>
+          )}
+        </TabsContent>
+        <TabsContent value="Ongoing">
+          {loading ? (
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : invoices.length > 0 ? (
+            invoices.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))
+          ) : (
+            <div>No ongoing services found.</div>
+          )}
+        </TabsContent>
+        <TabsContent value="Closed">
+          {loading ? (
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : invoices.length > 0 ? (
+            invoices.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))
+          ) : (
+            <div>No closed services found.</div>
           )}
         </TabsContent>
       </Tabs>

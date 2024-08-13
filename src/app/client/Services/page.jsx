@@ -1,56 +1,58 @@
 "use client";
-import Navbar from "../components/Navbar";
+
+import { useEffect, useState } from "react";
+import Navbar from "@/app/client/components/Navbar";
 import OngoingServices from "@/app/client/components/OngoingService";
 import UpcomingServices from "@/app/client/components/UpcomingService";
 import ClosedServices from "@/app/client/components/ClosedServices";
-import { withRoleProtection } from "../../../components/withRoleProtection";
-
-const ongoingServices = [
-  {
-    id: "service1",
-    name: "Example Service 1",
-    dateIn: "2023-06-01",
-    dateOut: "2023-06-30",
-  },
-  {
-    id: "service2",
-    name: "Example Service 2",
-    dateIn: "2023-06-05",
-    dateOut: "2023-06-25",
-  },
-];
-
-const upcomingServices = [
-  {
-    id: "service3",
-    name: "Future Service 1",
-    dateIn: "2023-07-01",
-    dateOut: "2023-07-15",
-  },
-  {
-    id: "service4",
-    name: "Future Service 2",
-    dateIn: "2023-07-10",
-    dateOut: "2023-07-20",
-  },
-];
-
-const closedServices = [
-  {
-    id: "service5",
-    name: "Past Service 1",
-    dateIn: "2023-05-01",
-    dateOut: "2023-05-15",
-  },
-  {
-    id: "service6",
-    name: "Past Service 2",
-    dateIn: "2023-04-10",
-    dateOut: "2023-04-20",
-  },
-];
+import { withRoleProtection } from "@/components/withRoleProtection";
+import { Toaster } from "react-hot-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function ServicesPage() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch("/api/customer/services");
+      if (!response.ok) {
+        throw new Error("Failed to fetch services");
+      }
+      const data = await response.json();
+      console.log("Fetched services:", data); // Add this line for debugging
+      setServices(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      setError("Failed to fetch services");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const ongoingServices = services.filter(
+    (service) => service.status === "Ongoing"
+  );
+  const upcomingServices = services.filter(
+    (service) => service.status === "Booked"
+  );
+  const closedServices = services.filter(
+    (service) => service.status === "Closed"
+  );
+
+  const ServicesSkeleton = () => (
+    <div className="space-y-4">
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-40 w-full" />
+    </div>
+  );
+
   return (
     <div>
       <Navbar />
@@ -58,31 +60,57 @@ function ServicesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           <div>
             <div className="text-2xl font-bold my-6 mx-auto text-center">
-              Ongoing Services
+              Booked Services
             </div>
-            {ongoingServices.map((service) => (
-              <OngoingServices key={service.id} service={service} />
-            ))}
+            {loading ? (
+              <ServicesSkeleton />
+            ) : error ? (
+              <p>{error}</p>
+            ) : upcomingServices.length > 0 ? (
+              upcomingServices.map((service) => (
+                <UpcomingServices key={service.id} service={service} />
+              ))
+            ) : (
+              <p>No Booked services</p>
+            )}
           </div>
           <div>
             <div className="text-2xl font-bold my-6 mx-auto text-center">
-              Upcoming Services
+              Ongoing Services
             </div>
-            {upcomingServices.map((service) => (
-              <UpcomingServices key={service.id} service={service} />
-            ))}
+            {loading ? (
+              <ServicesSkeleton />
+            ) : error ? (
+              <p>{error}</p>
+            ) : ongoingServices.length > 0 ? (
+              ongoingServices.map((service) => (
+                <OngoingServices key={service.id} service={service} />
+              ))
+            ) : (
+              <p>No ongoing services</p>
+            )}
           </div>
           <div>
             <div className="text-2xl font-bold my-6 mx-auto text-center">
               Closed Services
             </div>
-            {closedServices.map((service) => (
-              <ClosedServices key={service.id} service={service} />
-            ))}
+            {loading ? (
+              <ServicesSkeleton />
+            ) : error ? (
+              <p>{error}</p>
+            ) : closedServices.length > 0 ? (
+              closedServices.map((service) => (
+                <ClosedServices key={service.id} service={service} />
+              ))
+            ) : (
+              <p>No closed services</p>
+            )}
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }
+
 export default withRoleProtection(ServicesPage, ["customer"]);

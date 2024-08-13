@@ -9,6 +9,21 @@ export default function VehicleDetails({ vehicle }) {
       <CardContent>
         <div>ID: {vehicle.id}</div>
         <div>Name: {vehicle.name}</div>
+        <div>License Plate: {vehicle.licensePlate}</div>
+        <div>
+          Last Service Date:{" "}
+          {vehicle.lastServiceDate
+            ? new Date(vehicle.lastServiceDate).toLocaleDateString()
+            : "N/A"}
+        </div>
+        <div>
+          Next Service Date:{" "}
+          {new Date(vehicle.nextServiceDate).toLocaleDateString()}
+        </div>
+        <div>
+          Status:{" "}
+          {vehicle.status === "overdue" ? "Service Overdue" : "Up to date"}
+        </div>
       </CardContent>
     </Card>
   );

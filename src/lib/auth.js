@@ -31,6 +31,7 @@ export const authOptions = {
         if (!isPasswordValid) {
           throw new Error("Incorrect password.");
         }
+        console.log(user.id);
 
         return {
           id: user.id,
@@ -47,14 +48,18 @@ export const authOptions = {
       if (user) {
         token.role = user.role;
         token.image = user.image;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
+        session.user.name = token;
         session.user.role = token.role;
         session.user.image = token.image;
+        session.user.id = token.sub;
       }
+
       return session;
     },
   },
@@ -62,4 +67,7 @@ export const authOptions = {
     signIn: "/login",
     error: "/auth/error",
   },
+  // session: {
+  //   strategy: "jwt",
+  // },
 };

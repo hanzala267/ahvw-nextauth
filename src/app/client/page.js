@@ -1,11 +1,27 @@
 "use client";
 
-// import Navbar from "@/app/Client/components/Navbar";
+import { Suspense, lazy } from "react";
 import Navbar from "./components/Navbar";
-import OngoingServices from "@/app/client/components/OngoingServicesHome";
-import UpcomingServices from "@/app/client/components/UpcomingServicesHome";
-import PendingInvoices from "@/app/client/components/PendingInvoicesHome";
 import { withRoleProtection } from "../../components/withRoleProtection";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const OngoingServices = lazy(() => import("./components/OngoingServicesHome"));
+const UpcomingServices = lazy(() =>
+  import("./components/UpcomingServicesHome")
+);
+const PendingInvoices = lazy(() => import("./components/PendingInvoicesHome"));
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white p-4 rounded-lg shadow">
+      <Skeleton className="h-6 w-3/4 mb-4" />
+      <Skeleton className="h-20 w-full mb-2" />
+      <Skeleton className="h-20 w-full mb-2" />
+      <Skeleton className="h-20 w-full mb-2" />
+      <Skeleton className="h-10 w-1/3 mt-4" />
+    </div>
+  );
+}
 
 function CustomerDashboard() {
   return (
@@ -13,18 +29,15 @@ function CustomerDashboard() {
       <Navbar />
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-4">OngoingServices</h2>
+          <Suspense fallback={<SkeletonCard />}>
             <OngoingServices />
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-4">UpcomingServices</h2>
+          </Suspense>
+          <Suspense fallback={<SkeletonCard />}>
             <UpcomingServices />
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-4">Pending Invoices</h2>
+          </Suspense>
+          <Suspense fallback={<SkeletonCard />}>
             <PendingInvoices />
-          </div>
+          </Suspense>
         </div>
       </div>
     </>

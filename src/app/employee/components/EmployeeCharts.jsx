@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -10,12 +10,53 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import useEmployeeStore from "@/stores/employeeStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const EmployeeCharts = ({ weeklyData, monthlyData }) => {
+const EmployeeCharts = () => {
+  const {
+    weeklyData,
+    monthlyData,
+    isLoading,
+    setWeeklyData,
+    setMonthlyData,
+    setIsLoading,
+  } = useEmployeeStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [weeklyResponse, monthlyResponse] = await Promise.all([
+          fetch("/api/employee/weekly-stats"),
+          fetch("/api/employee/monthly-stats"),
+        ]);
+        const weeklyData = await weeklyResponse.json();
+        const monthlyData = await monthlyResponse.json();
+        setWeeklyData(weeklyData);
+        setMonthlyData(monthlyData);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Skeleton className="h-[300px] w-full" />
+        <Skeleton className="h-[300px] w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-4">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-medium text-black">You Stats</h1>
+        <h1 className="text-2xl font-medium text-black">Your Stats</h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white p-2 sm:p-6 shadow-md rounded-lg">

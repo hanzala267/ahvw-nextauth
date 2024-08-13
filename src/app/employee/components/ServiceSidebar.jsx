@@ -1,40 +1,37 @@
 "use client";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
 
-// Dummy data for services
-const services = [
-  {
-    id: "1",
-    name: "Brake Service",
-    parts: [{ name: "Brake Pads", qty: 2, price: 49.99, tax: 7.0 }],
-    hours: []
-  },
-  {
-    id: "2",
-    name: "Oil Change",
-    parts: [{ name: "Oil Filter", qty: 1, price: 24.99, tax: 1.75 }],
-    hours: []
-  },
-  {
-    id: "3",
-    name: "Air Filter Replacement",
-    parts: [{ name: "Air Filter", qty: 1, price: 19.99, tax: 0.0 }],
-    hours: []
-  },
-  // Add more services as needed
-];
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import useServiceStore from "@/stores/useServiceStore";
 
 const ServiceSidebar = ({
-  selectedService,
-  setSelectedService,
   sidebarOpen,
   setSidebarOpen,
   searchQuery,
   setSearchQuery,
 }) => {
+  const [services, setServices] = useState([]);
+  const { selectedService, setSelectedService } = useServiceStore();
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch("/api/employee/services");
+        if (!response.ok) {
+          throw new Error("Failed to fetch services");
+        }
+        const data = await response.json();
+        setServices(data);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
   const filteredServices = services.filter((service) =>
-    service.name.toLowerCase().includes(searchQuery.toLowerCase())
+    service.vehicle.licensePlate.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -46,7 +43,7 @@ const ServiceSidebar = ({
       <h2 className="text-xl font-medium text-gray-900 mb-4">Services</h2>
       <Input
         type="text"
-        placeholder="Search services"
+        placeholder="Search by license plate"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="mb-4"
@@ -65,7 +62,7 @@ const ServiceSidebar = ({
               setSidebarOpen(false);
             }}
           >
-            {service.name}
+            {service.vehicle.licensePlate} - {service.status}
           </li>
         ))}
       </ul>
