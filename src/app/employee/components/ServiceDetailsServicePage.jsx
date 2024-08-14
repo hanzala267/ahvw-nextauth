@@ -1,19 +1,24 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import toast from "react-hot-toast";
-import useServiceStore from "@/stores/useServiceStore"; // Import the Zustand store
+import useServiceStore from "@/stores/useServiceStore";
 
 const ServiceDetails = ({ service }) => {
   const { data: session } = useSession();
-  const [serviceHours, setServiceHours] = useState([]);
   const [newHours, setNewHours] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const { hasAddedHours, setHasAddedHours, resetHasAddedHours } =
-    useServiceStore(); // Use the Zustand store
+  const {
+    serviceHours,
+    setServiceHours,
+    hasAddedHours,
+    setHasAddedHours,
+    resetHasAddedHours,
+  } = useServiceStore();
 
   useEffect(() => {
     const fetchServiceHours = async () => {
@@ -26,9 +31,9 @@ const ServiceDetails = ({ service }) => {
           const data = await response.json();
           setServiceHours(data);
           if (data.length > 0) {
-            setHasAddedHours(true); // Mark as added if service hours exist
+            setHasAddedHours(true);
           } else {
-            resetHasAddedHours(); // Reset if no service hours exist
+            resetHasAddedHours();
           }
         } else {
           console.error("Failed to fetch service hours");
@@ -43,7 +48,7 @@ const ServiceDetails = ({ service }) => {
     };
 
     fetchServiceHours();
-  }, [service.id, setHasAddedHours, resetHasAddedHours]);
+  }, [service.id, setServiceHours, setHasAddedHours, resetHasAddedHours]);
 
   const handleAddServiceHours = async () => {
     try {
@@ -61,7 +66,7 @@ const ServiceDetails = ({ service }) => {
         const data = await response.json();
         setServiceHours([...serviceHours, data]);
         setNewHours(0);
-        setHasAddedHours(true); // Update the store state
+        setHasAddedHours(true);
         toast.success("Service hours added successfully");
       } else {
         console.error("Failed to create service hours");
@@ -98,32 +103,36 @@ const ServiceDetails = ({ service }) => {
             <div className="space-y-2">
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-4 w-2/3" />
             </div>
           ) : (
-            <ul>
-              {serviceHours.map((hour) => (
-                <li key={hour.id}>
-                  {hour.hours} hours by {hour.employee.firstName}{" "}
-                  {hour.employee.lastName}
+            <ul className="list-disc pl-5">
+              {serviceHours.map((sh) => (
+                <li key={sh.id}>
+                  {sh.hours} hours added on{" "}
+                  {new Date(sh.createdAt).toLocaleDateString()}
                 </li>
               ))}
             </ul>
           )}
-          {session?.user.role === "employee" && !hasAddedHours && (
-            <div className="flex items-center space-x-2 mt-2">
+        </div>
+
+        {!hasAddedHours && (
+          <div>
+            <label htmlFor="new-hours" className="block font-medium">
+              Add Hours
+            </label>
+            <div className="flex items-center space-x-2">
               <Input
                 type="number"
+                id="new-hours"
                 value={newHours}
                 onChange={(e) => setNewHours(e.target.value)}
-                min={0}
-                step={0.5}
-                className="w-20"
+                min="0"
               />
               <Button onClick={handleAddServiceHours}>Add Hours</Button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

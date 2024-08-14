@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Navbar from "../components/Navbar";
 import ServiceSidebar from "@/app/employee/components/ServiceSidebar";
-import ServiceDetails from "@/app/employee/components/ServicesDetails";
+import ServiceDetails from "@/app/employee/Components/ServiceDetailsServicePage";
 import MenuIcon from "@/app/employee/components/MenuIcon";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 import { Toaster } from "react-hot-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import useServiceStore from "@/stores/useServiceStore";
+import Component from "./../../client/components/VahiclesCard";
 
 const EmployeeServices = () => {
   const { data: session, status } = useSession();
