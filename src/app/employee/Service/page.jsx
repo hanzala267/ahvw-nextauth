@@ -10,7 +10,6 @@ import { withRoleProtection } from "../../../components/withRoleProtection";
 import { Toaster } from "react-hot-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import useServiceStore from "@/stores/useServiceStore";
-import Component from "./../../client/components/VahiclesCard";
 
 const EmployeeServices = () => {
   const { data: session, status } = useSession();
