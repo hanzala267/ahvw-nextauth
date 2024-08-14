@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Navbar from "../components/Navbar";
 import ServiceSidebar from "@/app/employee/components/ServiceSidebar";
-import ServiceDetails from "@/app/employee/Components/ServiceDetailsServicePage";
+import ServiceDetails from "@/app/employee/components/ServiceDetailsServicePage";
 import MenuIcon from "@/app/employee/components/MenuIcon";
 import { withRoleProtection } from "../../../components/withRoleProtection";
 import { Toaster } from "react-hot-toast";
